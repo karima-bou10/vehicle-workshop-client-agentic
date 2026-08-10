@@ -1,1 +1,1 @@
-# vehicle-workshop-client-AI
+# vehicle-workshop-client-agentic
