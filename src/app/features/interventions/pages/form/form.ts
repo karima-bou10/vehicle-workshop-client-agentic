@@ -1,0 +1,257 @@
+import { CommonModule } from '@angular/common';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { LoadingSpinner } from '../../../../shared/ui/loading-spinner/loading-spinner';
+import { NotificationService } from '../../../../core/services/notification.service';
+import {
+  Intervention,
+  STATUT_LIBELLES,
+  StatutIntervention,
+  TypeIntervention,
+  PrioriteIntervention,
+} from '../../models/intervention-view.model';
+import { InterventionsService } from '../../services/interventions.service';
+import { VehiculeListItem } from '../../../vehicules/models/vehicule.model';
+import { VehiculesService } from '../../../vehicules/services/vehicules.service';
+
+const TYPES: { value: TypeIntervention; label: string }[] = [
+  { value: 'DIAGNOSTIC', label: 'Diagnostic' },
+  { value: 'REVISION', label: 'Révision' },
+  { value: 'REPARATION', label: 'Réparation' },
+  { value: 'CONTROLE', label: 'Contrôle' },
+  { value: 'PNEUMATIQUES', label: 'Pneumatiques' },
+  { value: 'AUTRE', label: 'Autre' },
+];
+
+const PRIORITES: { value: PrioriteIntervention; label: string }[] = [
+  { value: 'BASSE', label: 'Basse' },
+  { value: 'NORMALE', label: 'Normale' },
+  { value: 'HAUTE', label: 'Haute' },
+  { value: 'URGENTE', label: 'Urgente' },
+];
+
+@Component({
+  selector: 'app-interventions-form-page',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, LoadingSpinner],
+  templateUrl: './form.html',
+  styleUrls: ['./form.scss']
+})
+export class InterventionsFormPage implements OnInit {
+  private readonly fb = inject(FormBuilder);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly service = inject(InterventionsService);
+  private readonly vehiculesService = inject(VehiculesService);
+  private readonly notification = inject(NotificationService);
+
+  readonly types = TYPES;
+  readonly priorites = PRIORITES;
+
+  /** Numero from route param — present → edit mode, absent → create mode */
+  readonly editNumero = signal<string | null>(null);
+  readonly loading = signal(false);
+  readonly submitting = signal(false);
+  readonly currentStatus = signal<StatutIntervention | null>(null);
+  readonly sourceIntervention = signal<Intervention | null>(null);
+  readonly vehicules = signal<VehiculeListItem[]>([]);
+
+  readonly form = this.fb.group({
+    vehiculeId: [null as number | null, [Validators.required, Validators.min(1)]],
+    type: ['' as TypeIntervention | '', [Validators.required]],
+    descriptionClient: ['', [Validators.required, Validators.minLength(3)]],
+    priorite: ['' as PrioriteIntervention | '', [Validators.required]],
+    dateDepot: ['', [Validators.required, this.notInFutureDateValidator]],
+  });
+
+  readonly statusLabel = computed(() => {
+    const status = this.currentStatus();
+    if (!status) {
+      return null;
+    }
+    return STATUT_LIBELLES[status];
+  });
+
+  readonly canEditForm = computed(() => {
+    const status = this.currentStatus();
+    if (!this.isEdit || !status) {
+      return true;
+    }
+    return status !== 'TERMINEE' && status !== 'RESTITUEE' && status !== 'ANNULEE';
+  });
+
+  readonly canEditVehicule = computed(() => this.isEdit && this.currentStatus() === 'RECUE');
+  readonly canEditType = computed(() => !this.isEdit || this.currentStatus() === 'RECUE');
+  readonly canEditDateDepot = computed(() => !this.isEdit || this.currentStatus() === 'RECUE');
+  readonly canEditDescription = computed(() => {
+    if (!this.isEdit) {
+      return true;
+    }
+    const status = this.currentStatus();
+    return status === 'RECUE' || status === 'DIAGNOSTIC_EN_COURS' || status === 'DEVIS_A_VALIDER';
+  });
+  readonly canEditPriorite = computed(() => {
+    if (!this.isEdit) {
+      return true;
+    }
+    const status = this.currentStatus();
+    return status === 'RECUE' || status === 'DIAGNOSTIC_EN_COURS' || status === 'DEVIS_A_VALIDER' || status === 'EN_REPARATION';
+  });
+
+  get isEdit(): boolean {
+    return !!this.editNumero();
+  }
+
+  ngOnInit(): void {
+    this.form.patchValue({ dateDepot: this.todayDateValue() });
+
+    const numero = this.route.snapshot.paramMap.get('numero');
+    if (numero) {
+      this.editNumero.set(numero);
+      this.loadIntervention(numero);
+      return;
+    }
+
+    this.loadVehicules();
+  }
+
+  private loadVehicules(): void {
+    this.vehiculesService.list(0, 200).subscribe({
+      next: (page) => {
+        console.log('Vehicules page', page.content);
+        console.log('Vehicules actifs', page.content.filter((v) => v.actif));
+        this.vehicules.set(page.content.filter((v) => v.actif));
+      },
+      error: () => this.vehicules.set([]),
+    });
+  }
+
+  private loadIntervention(numero: string): void {
+    this.loading.set(true);
+    this.service.getByNumero(numero).subscribe({
+      next: (iv: Intervention) => {
+        this.sourceIntervention.set(iv);
+        this.currentStatus.set(iv.statut);
+        this.form.patchValue({
+          type: iv.type,
+          descriptionClient: iv.descriptionClient,
+          priorite: iv.priorite,
+          dateDepot: iv.dateDepot ? this.toDateInput(iv.dateDepot) : this.todayDateValue(),
+        });
+        this.form.controls.vehiculeId.setValue(null);
+        this.applyFieldRules();
+        this.loading.set(false);
+      },
+      error: () => {
+        this.loading.set(false);
+        this.router.navigateByUrl('/interventions');
+      },
+    });
+  }
+
+  isInvalid(field: string): boolean {
+    const ctrl = this.form.get(field);
+    return !!(ctrl && ctrl.invalid && (ctrl.dirty || ctrl.touched));
+  }
+
+  submit(): void {
+    this.form.markAllAsTouched();
+    if (this.form.invalid || this.submitting()) return;
+
+    const raw = this.form.getRawValue();
+    this.submitting.set(true);
+
+    if (this.isEdit) {
+      if (!this.canEditForm()) {
+        this.notification.warning('Cette intervention est en lecture seule et ne peut pas être modifiée.');
+        this.submitting.set(false);
+        return;
+      }
+
+      const req = {
+        type: raw.type as TypeIntervention,
+        descriptionClient: raw.descriptionClient!,
+        priorite: raw.priorite as PrioriteIntervention,
+        dateDepot: raw.dateDepot ? this.toApiDate(raw.dateDepot) : new Date().toISOString(),
+      };
+      this.service.update(this.editNumero()!, req).subscribe({
+        next: (iv) => {
+          this.notification.success(`Intervention ${iv.numero} mise à jour.`);
+          this.router.navigateByUrl(`/interventions/${iv.numero}`);
+        },
+        error: () => this.submitting.set(false),
+      });
+    } else {
+      const req = {
+        vehiculeId: raw.vehiculeId!,
+        type: raw.type as TypeIntervention,
+        descriptionClient: raw.descriptionClient!,
+        priorite: raw.priorite as PrioriteIntervention,
+        dateDepot: raw.dateDepot ? this.toApiDate(raw.dateDepot) : null,
+      };
+      this.service.create(req).subscribe({
+        next: (iv) => {
+          this.notification.success(`Intervention ${iv.numero} créée.`);
+          this.router.navigateByUrl(`/interventions/${iv.numero}`);
+        },
+        error: () => this.submitting.set(false),
+      });
+    }
+  }
+
+  private applyFieldRules(): void {
+    this.form.controls.vehiculeId.disable();
+
+    if (!this.canEditForm()) {
+      this.form.disable();
+      return;
+    }
+
+    this.form.enable();
+    this.form.controls.vehiculeId.disable();
+
+    this.toggleControl(this.form.controls.type, this.canEditType());
+    this.toggleControl(this.form.controls.dateDepot, this.canEditDateDepot());
+    this.toggleControl(this.form.controls.descriptionClient, this.canEditDescription());
+    this.toggleControl(this.form.controls.priorite, this.canEditPriorite());
+  }
+
+  private toggleControl(control: AbstractControl, enabled: boolean): void {
+    if (enabled) {
+      control.enable();
+      return;
+    }
+    control.disable();
+  }
+
+  private todayDateValue(): string {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  private toDateInput(iso: string): string {
+    return iso.slice(0, 10);
+  }
+
+  private toApiDate(value: string): string {
+    return `${value}T00:00:00`;
+  }
+
+  private notInFutureDateValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value as string | null;
+    if (!value) {
+      return null;
+    }
+
+    const selected = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(selected.getTime())) {
+      return { invalidDate: true };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return selected.getTime() > today.getTime() ? { futureDate: true } : null;
+  }
+}
+

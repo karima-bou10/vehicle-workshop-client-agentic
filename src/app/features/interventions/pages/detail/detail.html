@@ -1,0 +1,319 @@
+<div class="detail-page">
+  @if (loading()) {
+    <div class="detail-page__center">
+      <app-loading-spinner />
+    </div>
+  } @else if (intervention(); as iv) {
+    <header class="detail-page__header">
+        <!--
+      <div class="detail-page__breadcrumb">
+        <a routerLink="/interventions" class="breadcrumb-link">← Interventions</a>
+      </div>-->
+
+      <div class="detail-page__title-row">
+        <div>
+          <h1 class="detail-page__numero">{{ iv.numero }}</h1>
+          <p class="detail-page__subtitle">
+            {{ iv.vehicule.marque }} {{ iv.vehicule.modele }} · {{ iv.vehicule.immatriculationFictive }}
+          </p>
+        </div>
+        <!--
+        <div class="detail-page__status-zone">
+          <app-status-tag [statut]="iv.statut" />
+          @if (!iv.actif) {
+            <span class="badge-archive">Archivée</span>
+          }
+        </div>-->
+@if (iv.actif) {
+    <div class="action-grid">
+
+        <a [routerLink]="['/interventions']" class="action-button action-button--secondary">
+             Retour
+        </a>
+        @if (canModify(iv.statut)) {
+        <a [routerLink]="['/interventions', iv.numero, 'modifier']" class="action-button action-button--secondary">
+            Modifier
+        </a>
+        }
+
+        @if (iv.statut === 'RECUE') {
+        <a [routerLink]="['/interventions', 'diagnostic']" [queryParams]="{ numero: iv.numero }"
+            class="action-button action-button--primary">
+            Saisir diagnostic
+        </a>
+        }
+
+        @if (iv.statut === 'DIAGNOSTIC_EN_COURS') {
+        <a [routerLink]="['/interventions', 'devis']" [queryParams]="{ numero: iv.numero }"
+            class="action-button action-button--primary">
+            Saisir devis
+        </a>
+        }
+
+        @if (iv.statut === 'DEVIS_A_VALIDER') {
+        <a [routerLink]="['/interventions', 'affectation']" [queryParams]="{ numero: iv.numero }"
+            class="action-button action-button--primary">
+            Affecter mécanicien
+        </a>
+        }
+
+        @if (iv.statut === 'EN_REPARATION') {
+        <button type="button" class="action-button action-button--success" (click)="openTransitionDialog('TERMINEE')"
+            [disabled]="actionBusy()">
+            Marquer terminée
+        </button>
+        }
+
+        <ng-container *appHasRole="'ROLE_MANAGER'">
+            @if (iv.statut === 'TERMINEE') {
+            <button type="button" class="action-button action-button--success"
+                (click)="openTransitionDialog('RESTITUEE')" [disabled]="actionBusy()">
+                Restituer
+            </button>
+            }
+
+            @if (canAnnuler(iv.statut)) {
+            <button type="button" class="action-button action-button--danger" (click)="openTransitionDialog('ANNULEE')"
+                [disabled]="actionBusy()">
+                Annuler l'intervention
+            </button>
+            }
+        </ng-container>
+
+        @if (canArchive(iv.statut)) {
+        <button type="button" class="action-button action-button--warning" (click)="openArchiveDialog()"
+            [disabled]="actionBusy()">
+            Archiver
+        </button>
+        }
+    </div>
+
+}
+      </div>
+    </header>
+
+    <section class="detail-card detail-card--full detail-card--workflow">
+      <div class="detail-card__title-row">
+        <h2 class="detail-card__title">Workflow</h2>
+        <p class="detail-card__hint">Étape courante : {{ statutLibelle(iv.statut) }}</p>
+      </div>
+      @if(isCancelled()) {
+        <p class="cancelled-banner">Intervention annulée</p>
+      }
+      <app-workflow-stepper [steps]="workflowSteps" [activeIndex]="currentStepIndex()" />
+    </section>
+
+    <div class="detail-page__grid">
+      <section class="detail-card">
+        <h2 class="detail-card__title">Informations</h2>
+        <dl class="detail-dl">
+          <div class="detail-dl__row">
+            <dt>Numéro</dt>
+            <dd class="mono">{{ iv.numero }}</dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Type</dt>
+            <dd>{{ typeLibelle(iv.type) }}</dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Priorité</dt>
+            <dd>{{ prioriteLibelle(iv.priorite) }}</dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Statut</dt>
+            <dd><app-status-tag [statut]="iv.statut" /></dd>
+          </div>
+        @if (iv.coutEstime !== null) {
+            <div class="detail-dl__row">
+            <dt>Coût estimé</dt>
+            <dd class="detail-text">{{ formatMontant(iv.coutEstime) }}</dd>
+            </div>
+        }
+          @if (iv.mecanicien) {
+            <div class="detail-dl__row">
+              <dt>Mécanicien</dt>
+              <dd>
+                {{ iv.mecanicien.nom }} · {{ iv.mecanicien.specialite }}
+                <span class="field-note" [class.field-note--available]="iv.mecanicien.disponible">
+                  {{ iv.mecanicien.disponible ? 'Disponible' : 'Indisponible' }}
+                </span>
+              </dd>
+            </div>
+          }
+        </dl>
+      </section>
+
+      <section class="detail-card">
+        <h2 class="detail-card__title">Véhicule</h2>
+        <dl class="detail-dl">
+          <div class="detail-dl__row">
+            <dt>Immatriculation</dt>
+            <dd class="mono">{{ iv.vehicule.immatriculationFictive }}</dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Marque / Modèle</dt>
+            <dd>{{ iv.vehicule.marque }} {{ iv.vehicule.modele }}</dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Année</dt>
+            <dd>{{ iv.vehicule.annee }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="detail-card">
+        <h2 class="detail-card__title">Dates</h2>
+        <dl class="detail-dl">
+          <div class="detail-dl__row">
+            <dt>Dépôt</dt>
+            <dd>{{ formatWorkflowDate(iv.dateDepot) }}</dd>
+          </div>
+          @if (iv.dateRestitutionPrevue) {
+            <div class="detail-dl__row">
+              <dt>Restitution prévue</dt>
+              <dd>{{ formatWorkflowDate(iv.dateRestitutionPrevue) }}</dd>
+            </div>
+          }
+          @if (iv.dateCloture) {
+            <div class="detail-dl__row">
+              <dt>Clôture</dt>
+              <dd>{{ formatWorkflowDate(iv.dateCloture) }}</dd>
+            </div>
+          }
+        </dl>
+      </section>
+
+      <section class="detail-card detail-card--full">
+        <h2 class="detail-card__title">Description client</h2>
+        <p class="detail-text">{{ iv.descriptionClient }}</p>
+      </section>
+
+      @if (iv.diagnostic) {
+        <section class="detail-card detail-card--full">
+          <h2 class="detail-card__title">Diagnostic</h2>
+          <p class="detail-text">{{ iv.diagnostic }}</p>
+        </section>
+      }
+    </div>
+    
+    <section class="detail-card detail-card--full">
+      <div class="detail-card__title-row">
+        <h2 class="detail-card__title">Historique</h2>
+        <p class="detail-card__hint">Timeline chronologique des transitions et motifs associés.</p>
+      </div>
+
+      @if (historyLoading()) {
+        <div class="section-center">
+          <app-loading-spinner />
+        </div>
+      } @else if (history(); as historyPage) {
+        @if (historyPage.content.length === 0) {
+          <app-empty-state message="Aucun changement de statut pour le moment." />
+        } @else {
+          <app-paginated-table [headers]="['Transition', 'Auteur', 'Date', 'Motif']">
+            @for (item of historyPage.content; track item.date + item.nouveauStatut) {
+              <div class="table-row table-row--history">
+                <span class="table-cell table-cell--strong">
+                  {{ statutLibelle(item.ancienStatut) }} → {{ statutLibelle(item.nouveauStatut) }}
+                </span>
+                <span class="table-cell">{{ item.auteur }}</span>
+                <span class="table-cell">{{ formatWorkflowDate(item.date) }}</span>
+                <span class="table-cell table-cell--wrap">{{ item.commentaire || '—' }}</span>
+              </div>
+            }
+          </app-paginated-table>
+
+          @if (historyPage.totalPages > 1) {
+            <nav class="pagination" aria-label="Pagination historique">
+              <button type="button" class="pagination__btn" [disabled]="historyPage.number === 0" (click)="goToHistoryPage(historyPage.number - 1)">
+                ‹ Préc.
+              </button>
+
+              @for (p of historyPageRange(); track p) {
+                <button type="button" class="pagination__btn" [class.pagination__btn--active]="p === historyPage.number" (click)="goToHistoryPage(p)">
+                  {{ p + 1 }}
+                </button>
+              }
+
+              <button type="button" class="pagination__btn" [disabled]="historyPage.number >= historyPage.totalPages - 1" (click)="goToHistoryPage(historyPage.number + 1)">
+                Suiv. ›
+              </button>
+
+              <span class="pagination__info">
+                Page {{ historyPage.number + 1 }} / {{ historyPage.totalPages }} · {{ historyPage.totalElements }} entrées
+              </span>
+            </nav>
+          }
+        }
+      }
+    </section>
+
+    <section class="detail-card detail-card--full">
+      <div class="detail-card__title-row">
+        <h2 class="detail-card__title">Autres interventions du véhicule</h2>
+        <p class="detail-card__hint">Related list paginée du même véhicule.</p>
+      </div>
+
+      @if (relatedLoading()) {
+        <div class="section-center">
+          <app-loading-spinner />
+        </div>
+      } @else if (related(); as relatedPage) {
+        @if (relatedPage.content.length === 0) {
+          <app-empty-state message="Aucune autre intervention pour ce véhicule." />
+        } @else {
+          <app-paginated-table [headers]="['Numéro', 'Type', 'Statut', 'Dépôt', 'Actions']">
+            @for (item of relatedPage.content; track item.numero) {
+              <div class="table-row table-row--related">
+                <span class="table-cell table-cell--strong">
+                  <a [routerLink]="['/interventions', item.numero]" class="link-numero">{{ item.numero }}</a>
+                </span>
+                <span class="table-cell">{{ typeLibelle(item.type) }}</span>
+                <span class="table-cell"><app-status-tag [statut]="item.statut" /></span>
+                <span class="table-cell">{{ formatWorkflowDate(item.dateDepot) }}</span>
+                <span class="table-cell table-cell--actions">
+                  <a [routerLink]="['/interventions', item.numero]" class="link-numero">Détail</a>
+                </span>
+              </div>
+            }
+          </app-paginated-table>
+
+          @if (relatedPage.totalPages > 1) {
+            <nav class="pagination" aria-label="Pagination related list">
+              <button type="button" class="pagination__btn" [disabled]="relatedPage.number === 0" (click)="goToRelatedPage(relatedPage.number - 1)">
+                ‹ Préc.
+              </button>
+
+              @for (p of relatedPageRange(); track p) {
+                <button type="button" class="pagination__btn" [class.pagination__btn--active]="p === relatedPage.number" (click)="goToRelatedPage(p)">
+                  {{ p + 1 }}
+                </button>
+              }
+
+              <button type="button" class="pagination__btn" [disabled]="relatedPage.number >= relatedPage.totalPages - 1" (click)="goToRelatedPage(relatedPage.number + 1)">
+                Suiv. ›
+              </button>
+
+              <span class="pagination__info">
+                Page {{ relatedPage.number + 1 }} / {{ relatedPage.totalPages }} · {{ relatedPage.totalElements }} entrées
+              </span>
+            </nav>
+          }
+        }
+      }
+    </section>
+
+    <app-confirmation-dialog
+      [open]="!!dialogState()"
+      [title]="dialogState()?.title ?? ''"
+      [message]="dialogState()?.message ?? ''"
+      [variant]="dialogState()?.variant ?? 'info'"
+      [confirmLabel]="dialogState()?.confirmLabel ?? 'Confirmer'"
+      [cancelLabel]="dialogState()?.cancelLabel ?? 'Retour'"
+      [requireReason]="dialogState()?.requireReason ?? false"
+      [reasonPlaceholder]="dialogState()?.reasonPlaceholder ?? 'Saisissez un motif'"
+      (confirm)="confirmDialog($event)"
+      (cancel)="closeDialog()"
+    />
+  }
+</div>

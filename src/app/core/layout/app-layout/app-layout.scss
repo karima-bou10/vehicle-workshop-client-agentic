@@ -1,0 +1,29 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+}
+
+.shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: auto 1fr;
+}
+
+.shell__workspace {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface-bg);
+}
+
+.shell__content {
+  flex: 1;
+  padding: 0 1.5rem 1.5rem;
+}
+
+@media (max-width: 980px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+}
+

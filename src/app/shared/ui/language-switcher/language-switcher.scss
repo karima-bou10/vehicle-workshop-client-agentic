@@ -1,0 +1,20 @@
+.switcher {
+  border: 1px solid var(--border-soft);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.label {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.value {
+  font-weight: 600;
+}

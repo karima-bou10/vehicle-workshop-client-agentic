@@ -1,0 +1,22 @@
+.table-shell {
+  border: 1px solid color-mix(in srgb, var(--border-soft) 88%, transparent);
+  border-radius: 1rem;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--surface-card) 96%, transparent);
+  box-shadow: var(--shadow-soft);
+}
+
+.table-head{
+  display: grid;
+  grid-auto-flow: column;
+  gap: 0.5rem;
+  padding: 0.7rem 0.9rem;
+  background: #F4F7FF;
+  align-items: center;
+  border-bottom: 1px solid color-mix(in srgb, var(--border-soft) 88%, transparent);
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.76rem;
+}

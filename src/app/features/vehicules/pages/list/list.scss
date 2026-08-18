@@ -1,0 +1,16 @@
+.feature-card {
+	background: var(--surface-card);
+	border: 1px solid var(--border-soft);
+	border-radius: 1rem;
+	padding: 1.2rem;
+	box-shadow: var(--shadow-soft);
+}
+
+h1 {
+	margin: 0;
+}
+
+p {
+	margin: 0.4rem 0 0;
+	color: var(--text-muted);
+}

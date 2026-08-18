@@ -1,0 +1,93 @@
+
+<main class="login-page">
+  <section class="login-brand">
+    <div>
+      <header class="brand-header">
+        <div class="brand-logo">AW</div>
+        <div>
+          <div class="brand-name">Atelier <span>Vehicle Workshop</span></div>
+          <div class="brand-subtitle">Gestion des interventions atelier</div>
+        </div>
+      </header>
+
+      <div class="brand-hero">
+        <span class="eyebrow">PLATEFORME ATELIER</span>
+        <h1>Gérez votre atelier<br><strong>simplement.</strong></h1>
+        <p>Centralisez les véhicules, diagnostics, devis, réparations, affectations et restitutions dans un seul espace.
+        </p>
+      </div>
+
+      <div class="feature-grid">
+        <article class="feature-card"><b>↗</b><span><strong>Interventions</strong><small>Suivi en temps
+              réel</small></span></article>
+        <article class="feature-card"><b>⌕</b><span><strong>Diagnostics</strong><small>Historique
+              détaillé</small></span></article>
+        <article class="feature-card"><b>▣</b><span><strong>Devis</strong><small>Création rapide</small></span>
+        </article>
+        <article class="feature-card"><b>◎</b><span><strong>Affectations</strong><small>Techniciens &
+              tâches</small></span></article>
+        <article class="feature-card"><b>⚙</b><span><strong>Réparations</strong><small>Suivi des étapes</small></span>
+        </article>
+        <article class="feature-card"><b>✓</b><span><strong>Restitutions</strong><small>Historique
+              complet</small></span></article>
+      </div>
+    </div>
+
+    <footer class="brand-footer">
+      <span>© 2026 Atelier Vehicle Workshop</span>
+      <span>Gestion atelier</span>
+    </footer>
+  </section>
+
+  <section class="login-panel">
+    <div class="login-card">
+      <div class="login-heading">
+        <span class="login-kicker">ESPACE ATELIER</span>
+        <h2>Bienvenue</h2>
+        <p>Connectez-vous pour accéder à votre espace.</p>
+      </div>
+
+      <div *ngIf="authError()" class="auth-error" role="alert" aria-live="polite">
+        <span class="auth-error-icon">!</span>
+        <span>{{ authError() }}</span>
+      </div>
+
+      <form [formGroup]="form" (ngSubmit)="submit()" class="login-form" novalidate>
+        <div class="field" [class.field-error]="isInvalid('username')">
+          <label for="login-username">Identifiant</label>
+          <div class="input-wrap">
+            <span class="input-icon">◉</span>
+            <input id="login-username" type="text" formControlName="username" autocomplete="username"
+              placeholder="Votre identifiant" class="field-input">
+          </div>
+          <span *ngIf="isInvalid('username')" class="field-message" role="alert">
+            L’identifiant est obligatoire.
+          </span>
+        </div>
+
+        <div class="field" [class.field-error]="isInvalid('password')">
+          <label for="login-password">Mot de passe</label>
+          <div class="input-wrap">
+            <span class="input-icon">◆</span>
+            <input id="login-password" [type]="passwordVisible() ? 'text' : 'password'" formControlName="password"
+              autocomplete="current-password" placeholder="Votre mot de passe" class="field-input field-input-password">
+            <button type="button" class="password-toggle" (click)="togglePassword()">
+              {{ passwordVisible() ? 'Masquer' : 'Afficher' }}
+            </button>
+          </div>
+          <span *ngIf="isInvalid('password')" class="field-message" role="alert">
+            Le mot de passe doit contenir au moins 4 caractères.
+          </span>
+        </div>
+
+
+        <button type="submit" class="submit-button" [disabled]="isSubmitting()">
+          <span *ngIf="!isSubmitting()">Se connecter <b>→</b></span>
+          <span *ngIf="isSubmitting()"><i class="spinner"></i> Connexion...</span>
+        </button>
+      </form>
+    </div>
+  </section>
+</main>
+
+```

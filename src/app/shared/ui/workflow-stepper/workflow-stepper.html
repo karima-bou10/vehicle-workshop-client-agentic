@@ -1,0 +1,12 @@
+<div class="stepper">
+  @for (step of steps(); track step; let i = $index) {
+    <span
+      class="step"
+      [class.step--active]="i === normalizedActiveIndex()"
+      [class.step--done]="i < normalizedActiveIndex()"
+    >
+      <span class="step__index">{{ i + 1 }}</span>
+      <span class="step__label">{{ step }}</span>
+    </span>
+  }
+</div>

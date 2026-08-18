@@ -1,0 +1,142 @@
+<div class="form-page">
+
+  <header class="form-page__header">
+    <h1 class="form-page__title">
+      {{ isEdit ? 'Modifier l\'intervention' : 'Nouvelle intervention' }}
+    </h1>
+    @if (isEdit) {
+      <p class="form-page__subtitle form-page__subtitle--mono">{{ editNumero() }}</p>
+      @if (statusLabel(); as status) {
+        <p class="form-page__subtitle">Statut courant : {{ status }}</p>
+      }
+      @if (!canEditForm()) {
+        <p class="form-page__subtitle">Intervention en lecture seule.</p>
+      }
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="form-page__center">
+      <app-loading-spinner />
+    </div>
+  } @else {
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form-card">
+
+      <!-- Véhicule (création seulement) -->
+      @if (!isEdit) {
+        <div class="field" [class.field--erreur]="isInvalid('vehiculeId')">
+          <label class="field__label" for="vehiculeId">Véhicule <span class="required">*</span></label>
+          <select id="vehiculeId" formControlName="vehiculeId" class="field__input">
+            <option [ngValue]="null" disabled selected hidden>Sélectionner un véhicule</option>
+            @for (v of vehicules(); track v.id) {
+              <option [ngValue]="v.id">{{ v.marque }} {{ v.modele }} — {{ v.immatriculationFictive }}</option>
+            }
+          </select>
+          @if (isInvalid('vehiculeId')) {
+            <span class="field__error" role="alert">Le véhicule est obligatoire.</span>
+          }
+        </div>
+      }
+
+      @if (isEdit && canEditVehicule() && sourceIntervention(); as iv) {
+        <div class="field field--full">
+          <label class="field__label">Véhicule</label>
+          <div class="field__input field__input--readonly">
+            {{ iv.vehicule.marque }} {{ iv.vehicule.modele }} — {{ iv.vehicule.immatriculationFictive }}
+          </div>
+        </div>
+      }
+
+      <!-- Type -->
+      @if (canEditType()) {
+      <div class="field" [class.field--erreur]="isInvalid('type')">
+        <label class="field__label" for="type">Type d'intervention <span class="required">*</span></label>
+        <select id="type" formControlName="type" class="field__input">
+          <option value="" disabled selected hidden>Sélectionner un type</option>
+          @for (t of types; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+        @if (isInvalid('type')) {
+          <span class="field__error" role="alert">Le type est obligatoire.</span>
+        }
+      </div>
+      }
+
+      <!-- Priorité -->
+      @if (canEditPriorite()) {
+      <div class="field" [class.field--erreur]="isInvalid('priorite')">
+        <label class="field__label" for="priorite">Priorité <span class="required">*</span></label>
+        <select id="priorite" formControlName="priorite" class="field__input">
+          <option value="" disabled selected hidden>Sélectionner une priorité</option>
+          @for (p of priorites; track p.value) {
+            <option [value]="p.value">{{ p.label }}</option>
+          }
+        </select>
+        @if (isInvalid('priorite')) {
+          <span class="field__error" role="alert">La priorité est obligatoire.</span>
+        }
+      </div>
+      }
+
+      <!-- Description client -->
+      @if (canEditDescription()) {
+      <div class="field field--full" [class.field--erreur]="isInvalid('descriptionClient')">
+        <label class="field__label" for="descriptionClient">Description client <span class="required">*</span></label>
+        <textarea
+          id="descriptionClient"
+          formControlName="descriptionClient"
+          class="field__input field__textarea"
+          rows="3"
+          placeholder="Décrivez la demande du client"
+        ></textarea>
+        @if (isInvalid('descriptionClient')) {
+          <span class="field__error" role="alert">La description client est obligatoire (min. 3 caractères).</span>
+        }
+      </div>
+      }
+
+      <!-- Dates -->
+      @if (canEditDateDepot()) {
+      <div class="field">
+        <label class="field__label" for="dateDepot">Date de dépôt <span class="required">*</span></label>
+        <input
+          id="dateDepot"
+          type="date"
+          formControlName="dateDepot"
+          class="field__input"
+        />
+        @if (isInvalid('dateDepot')) {
+          <span class="field__error" role="alert">Date obligatoire et non future.</span>
+        }
+      </div>
+      }
+
+      @if (isEdit && sourceIntervention(); as iv) {
+        <div class="field field--full">
+          <label class="field__label">Informations verrouillées par le workflow</label>
+          <div class="field__input field__input--readonly">
+            Diagnostic : {{ iv.diagnostic ?? '—' }} · Coût estimé : {{ iv.coutEstime ?? '—' }} · Restitution prévue : {{ iv.dateRestitutionPrevue ? (iv.dateRestitutionPrevue | date:'short':'':'fr-FR') : '—' }}
+          </div>
+        </div>
+      }
+
+      <!-- Actions -->
+      <div class="form-card__actions">
+        <a routerLink="/interventions" class="btn-cancel">Annuler</a>
+        @if (canEditForm()) {
+        <button type="submit" class="btn-submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <app-loading-spinner />
+          } @else {
+            {{ isEdit ? 'Enregistrer les modifications' : 'Créer l\'intervention' }}
+          }
+        </button>
+        }
+      </div>
+
+    </form>
+  }
+
+</div>

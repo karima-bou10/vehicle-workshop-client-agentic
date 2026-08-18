@@ -1,0 +1,47 @@
+<section class="feature-card">
+	@if (loading()) {
+		<app-loading-spinner />
+	} @else if (intervention(); as iv) {
+		<header class="feature-card__header">
+			<div>
+				<h1>Devis</h1>
+				<p>{{ iv.numero }} · {{ iv.vehicule.marque }} {{ iv.vehicule.modele }}</p>
+			</div>
+		</header>
+
+		<form [formGroup]="form" class="workflow-form" (ngSubmit)="submit()">
+			<label>
+				<span>Coût estimé</span>
+				<input type="number" min="0" step="0.01" formControlName="coutEstime" placeholder="Montant en euros" (keypress)="allowOnlyNumber($event)" />
+			</label>
+
+			<label>
+				<span>Date de restitution prévue</span>
+				<input type="date" formControlName="dateRestitutionPrevue" />
+			</label>
+
+			@if (form.controls.coutEstime.touched && form.controls.coutEstime.invalid) {
+				<p class="workflow-form__error">Coût estimé obligatoire.</p>
+			}
+            @if (form.controls.dateRestitutionPrevue.touched && form.controls.dateRestitutionPrevue.invalid) {
+				<p class="workflow-form__error">Date de restitution prévue obligatoire et ne peut pas être dans le passé.</p>
+			}
+
+			<div class="workflow-form__actions">
+				<a [routerLink]="['/interventions', iv.numero]" class="btn-secondary">Annuler</a>
+				<button type="submit" class="btn-primary" [disabled]="saving()">Confirmer</button>
+			</div>
+		</form>
+	}
+
+	<app-confirmation-dialog
+		[open]="dialogOpen()"
+		title="Confirmer le devis ?"
+		[message]="'Le coût estimé sera enregistré puis l\'intervention passera au statut Devis à valider.'"
+		variant="info"
+		confirmLabel="Confirmer"
+		cancelLabel="Retour"
+		(confirm)="confirm()"
+		(cancel)="cancel()"
+	/>
+</section>

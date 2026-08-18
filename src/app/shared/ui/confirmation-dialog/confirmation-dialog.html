@@ -1,0 +1,49 @@
+<div
+  *ngIf="open()"
+  class="dialog-backdrop"
+  (click)="onOverlayClick()"
+>
+  <section
+    class="dialog-shell"
+    [class.dialog-shell--alert]="variant() === 'alert'"
+    role="dialog"
+    aria-modal="true"
+    (click)="onDialogClick($event)"
+  >
+    <header class="dialog-header">
+      <div class="dialog-icon" aria-hidden="true">
+        {{ variant() === 'alert' ? '⚠️' : 'ℹ️' }}
+      </div>
+      <div class="dialog-heading">
+        <h3>{{ title() }}</h3>
+        <p *ngIf="message()">{{ message() }}</p>
+      </div>
+    </header>
+
+    <label *ngIf="requireReason()" class="dialog-reason">
+      <span>Motif *</span>
+      <textarea
+        #reasonInput
+        rows="4"
+        [attr.placeholder]="reasonPlaceholder()"
+        [value]="reason()"
+        (input)="onReasonInput(reasonInput.value)"
+      ></textarea>
+    </label>
+
+    <footer class="dialog-actions">
+      <button type="button" class="ghost-button" (click)="onCancel()">
+        {{ cancelLabel() }}
+      </button>
+      <button
+        type="button"
+        class="confirm-button"
+        [class.confirm-button--alert]="variant() === 'alert'"
+        [disabled]="confirmDisabled()"
+        (click)="onConfirm()"
+      >
+        {{ confirmLabel() }}
+      </button>
+    </footer>
+  </section>
+</div>

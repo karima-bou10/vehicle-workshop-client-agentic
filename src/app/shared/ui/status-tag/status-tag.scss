@@ -1,0 +1,45 @@
+.status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 0.22rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--color-action) 14%, transparent);
+  color: var(--color-action);
+
+  &--recue {
+    background: color-mix(in srgb, var(--color-action) 14%, transparent);
+    color: var(--color-action);
+  }
+
+  &--diagnostic_en_cours {
+    background: color-mix(in srgb, var(--color-wait) 18%, transparent);
+    color: var(--color-wait);
+  }
+
+  &--devis_a_valider {
+    background: color-mix(in srgb, #9333ea 16%, transparent);
+    color: #9333ea;
+  }
+
+  &--en_reparation {
+    background: color-mix(in srgb, var(--color-wait) 18%, transparent);
+    color: var(--color-wait);
+  }
+
+  &--terminee {
+    background: color-mix(in srgb, var(--color-done) 16%, transparent);
+    color: var(--color-done);
+  }
+
+  &--restituee {
+    background: color-mix(in srgb, var(--color-done) 12%, transparent);
+    color: var(--color-done);
+  }
+
+  &--annulee {
+    background: color-mix(in srgb, var(--color-danger) 14%, transparent);
+    color: var(--color-danger);
+  }
+}
