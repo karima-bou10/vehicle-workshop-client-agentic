@@ -1,0 +1,38 @@
+<section class="feature-card">
+	@if (loading()) {
+		<app-loading-spinner />
+	} @else if (intervention(); as iv) {
+		<header class="feature-card__header">
+			<div>
+				<h1>Diagnostic</h1>
+				<p>{{ iv.numero }} · {{ iv.vehicule.marque }} {{ iv.vehicule.modele }}</p>
+			</div>
+		</header>
+
+		<form [formGroup]="form" class="workflow-form" (ngSubmit)="submit()">
+			<label>
+				<textarea rows="8" formControlName="diagnostic" placeholder="Décrire le diagnostic"></textarea>
+			</label>
+
+			@if (form.controls.diagnostic.touched && form.controls.diagnostic.invalid) {
+				<p class="workflow-form__error">Diagnostic obligatoire, au moins 3 caractères.</p>
+			}
+
+			<div class="workflow-form__actions">
+				<a [routerLink]="['/interventions', iv.numero]" class="btn-secondary">Annuler</a>
+				<button type="submit" class="btn-primary" [disabled]="saving()">Confirmer</button>
+			</div>
+		</form>
+	}
+
+	<app-confirmation-dialog
+		[open]="dialogOpen()"
+		title="Confirmer le diagnostic ?"
+		[message]="'Le diagnostic sera enregistré puis l\'intervention passera au statut Diagnostic en cours.'"
+		variant="info"
+		confirmLabel="Confirmer"
+		cancelLabel="Retour"
+		(confirm)="confirm()"
+		(cancel)="cancel()"
+	/>
+</section>

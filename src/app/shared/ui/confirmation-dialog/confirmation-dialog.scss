@@ -1,0 +1,200 @@
+:host {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: block;
+  pointer-events: none;
+}
+
+.dialog-backdrop {
+  pointer-events: auto;
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  padding: 1.25rem;
+  background: rgba(7, 11, 17, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: backdropFade 140ms ease-out;
+}
+
+.dialog-shell {
+  width: min(100%, 34rem);
+  border: 1px solid color-mix(in srgb, var(--border-soft) 92%, transparent);
+  border-radius: 1.2rem;
+  padding: 1.25rem;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--surface-card) 96%, #ffffff 4%), var(--surface-card));
+  color: var(--text-primary);
+  box-shadow: var(--shadow-soft);
+  transform-origin: center;
+  animation: dialogPop 180ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dialog-shell--alert {
+  border-color: color-mix(in srgb, var(--color-danger) 48%, var(--border-soft));
+  box-shadow: 0 16px 44px rgba(214, 69, 69, 0.14), var(--shadow-soft);
+}
+
+.dialog-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.dialog-icon {
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-action) 15%, transparent);
+  color: var(--color-action);
+  font-size: 1.15rem;
+}
+
+.dialog-shell--alert .dialog-icon {
+  background: color-mix(in srgb, var(--color-danger) 16%, transparent);
+  color: var(--color-danger);
+}
+
+.dialog-heading {
+  min-width: 0;
+
+  h3 {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+}
+
+.dialog-reason {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 0.9rem;
+
+  span {
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 7.5rem;
+    resize: vertical;
+    border: 1px solid var(--border-soft);
+    border-radius: 0.95rem;
+    padding: 0.95rem 1rem;
+    background: color-mix(in srgb, var(--surface-bg) 38%, var(--surface-card));
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease;
+  }
+
+  textarea::placeholder {
+    color: color-mix(in srgb, var(--text-muted) 72%, transparent);
+  }
+
+  textarea:focus {
+    border-color: var(--color-action);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-action) 18%, transparent);
+  }
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+button {
+  border: 0;
+  border-radius: 0.9rem;
+  padding: 0.82rem 1.1rem;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    transform 140ms ease,
+    box-shadow 140ms ease,
+    background-color 140ms ease,
+    color 140ms ease,
+    border-color 140ms ease,
+    opacity 140ms ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.ghost-button {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-soft);
+}
+
+.confirm-button {
+  background: var(--color-action);
+  color: var(--text-on-dark);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--color-action) 30%, transparent);
+}
+
+.confirm-button--alert {
+  background: var(--color-danger);
+  box-shadow: 0 10px 28px color-mix(in srgb, var(--color-danger) 30%, transparent);
+}
+
+@keyframes backdropFade {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialogPop {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 640px) {
+  .dialog-shell {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  .dialog-actions {
+    flex-direction: column-reverse;
+  }
+
+  .dialog-actions button {
+    width: 100%;
+  }
+}

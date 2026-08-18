@@ -1,0 +1,39 @@
+<section class="feature-card">
+	@if (loading()) {
+		<app-loading-spinner />
+	} @else if (intervention(); as iv) {
+		<header class="feature-card__header">
+            			<div>
+				<h1>Affectation</h1>
+				<p>{{ iv.numero }} · {{ iv.vehicule.marque }} {{ iv.vehicule.modele }}</p>
+			</div>
+		</header>
+
+		<form [formGroup]="form" class="workflow-form" (ngSubmit)="submit()">
+			<label>
+				<span>ID mécanicien</span>
+				<input type="number" min="1" formControlName="mecanicienId" placeholder="Identifiant technique" />
+			</label>
+
+			@if (form.controls.mecanicienId.touched && form.controls.mecanicienId.invalid) {
+				<p class="workflow-form__error">Mécanicien obligatoire.</p>
+			}
+
+			<div class="workflow-form__actions">
+				<a [routerLink]="['/interventions', iv.numero]" class="btn-secondary">Annuler</a>
+				<button type="submit" class="btn-primary" [disabled]="saving()">Confirmer</button>
+			</div>
+		</form>
+	}
+
+	<app-confirmation-dialog
+		[open]="dialogOpen()"
+		title="Confirmer l'affectation ?"
+		[message]="'Le mécanicien sera affecté puis l\'intervention passera en réparation.'"
+		variant="info"
+		confirmLabel="Confirmer"
+		cancelLabel="Retour"
+		(confirm)="confirm()"
+		(cancel)="cancel()"
+	/>
+</section>

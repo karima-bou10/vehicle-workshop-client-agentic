@@ -1,0 +1,4 @@
+<button type="button" class="switcher" (click)="switchLanguage()" [attr.aria-label]="t('toolbar.language')">
+  <span class="label">{{ t('toolbar.language') }}</span>
+  <span class="value">{{ activeLanguage().toUpperCase() }}</span>
+</button>

@@ -1,1 +1,82 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+:root {
+	--surface-bg: #f4f6f8;
+	--surface-bg-alt: #e9edf1;
+	--surface-card: #ffffff;
+	--surface-sidebar: #1c2230;
+	--surface-sidebar-alt: #141a24;
+
+	--text-primary: #101820;
+	--text-muted: #53606d;
+	--text-on-dark: #edf2f7;
+
+	--color-action: #1f5daa;
+	--color-action-hover: #194b88;
+	--color-wait: #ff8f1f;
+	--color-done: #2e9f56;
+	--color-danger: #d64545;
+
+	--border-soft: #d4dce3;
+	--shadow-soft: 0 4px 24px rgba(9, 19, 31, 0.1), 0 1px 4px rgba(9, 19, 31, 0.06);
+	--radius-card: 1rem;
+}
+
+:root[data-theme='dark'] {
+	--surface-bg: #0f141b;
+	--surface-bg-alt: #101923;
+	--surface-card: #182230;
+	--surface-sidebar: #0b1016;
+	--surface-sidebar-alt: #0f1620;
+
+	--text-primary: #e8edf3;
+	--text-muted: #9cadbf;
+	--text-on-dark: #e8edf3;
+
+	--color-action: #5b93d9;
+	--color-action-hover: #74a8ea;
+	--color-wait: #ffa847;
+	--color-done: #6fd488;
+	--color-danger: #f26a6a;
+
+	--border-soft: #2b3949;
+	--shadow-soft: 0 4px 24px rgba(0, 0, 0, 0.38), 0 1px 4px rgba(0, 0, 0, 0.22);
+	--radius-card: 1rem;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100%;
+}
+
+body {
+	font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+	color: var(--text-primary);
+	background:
+		radial-gradient(circle at 9% 8%, rgba(31, 93, 170, 0.12), transparent 40%),
+		radial-gradient(circle at 88% 16%, rgba(255, 143, 31, 0.1), transparent 42%),
+		linear-gradient(145deg, var(--surface-bg), var(--surface-bg-alt));
+}
+
+h1,
+h2,
+h3 {
+	font-family: 'Space Grotesk', 'IBM Plex Sans', sans-serif;
+	letter-spacing: 0.01em;
+}
+
+a {
+	color: var(--color-action);
+	text-decoration: none;
+}
+
+input,
+select,
+textarea {
+	font-family: inherit;
+}

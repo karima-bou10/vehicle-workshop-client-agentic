@@ -1,0 +1,4 @@
+<button type="button" class="toggle" (click)="toggle()" [attr.aria-label]="t('toolbar.theme')">
+  <span class="label">{{ t('toolbar.theme') }}</span>
+  <span class="value">{{ activeTheme() === 'dark' ? t('theme.dark') : t('theme.light') }}</span>
+</button>

@@ -1,0 +1,27 @@
+<div class="user-menu" [class.user-menu--reduit]="reduit()">
+  @if (ouvert()) {
+    <div class="user-menu__panneau" (click)="$event.stopPropagation()">
+      <button type="button" class="user-menu__action user-menu__action--danger" (click)="deconnexion()">
+        {{ t('sidebar.logout') }}
+      </button>
+    </div>
+  }
+
+  <button
+    type="button"
+    class="user-menu__bouton"
+    [attr.aria-expanded]="ouvert()"
+    [title]="reduit() ? nom() : ''"
+    (click)="basculer($event)">
+    <span class="user-menu__avatar">{{ initiales() }}</span>
+
+    <span class="user-menu__identite">
+      <span class="user-menu__nom">{{ nom() }}</span>
+      <span class="user-menu__role">{{ roleLibelle() }}</span>
+    </span>
+
+    <svg class="user-menu__chevron" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+      <path d="M4 10l4-4 4 4" stroke-linecap="round" stroke-linejoin="round" />
+    </svg>
+  </button>
+</div>

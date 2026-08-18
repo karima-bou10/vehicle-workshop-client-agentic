@@ -1,0 +1,8 @@
+<div class="toast-container" aria-live="polite" aria-atomic="true">
+  @for (message of messages(); track message.id) {
+    <div class="toast" [class.toast--error]="message.ton === 'error'" [class.toast--warning]="message.ton === 'warning'" [class.toast--success]="message.ton === 'success'">
+      <span>{{ message.message }}</span>
+      <button type="button" (click)="dismiss(message.id)">×</button>
+    </div>
+  }
+</div>
