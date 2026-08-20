@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
+import { MecaniciensService } from '../../../mecaniciens/services/mecanicien.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
 import { LoadingSpinner } from '../../../../shared/ui/loading-spinner/loading-spinner';
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Intervention, MecanicienAffectationRequest } from '../../models/intervention-view.model';
-import { InterventionsService } from '../../services/interventions.service';
+import { InterventionsService } from '../../services/interventions.service'
+import { MecanicienListItem, SPECIALITE_LIBELLES } from '../../../mecaniciens/models/mecanicien.model';
 
 @Component({
 	selector: 'app-interventions-affectation-page',
@@ -20,12 +22,16 @@ export class InterventionsAffectationPage implements OnInit {
 	private readonly router = inject(Router);
 	private readonly fb = inject(FormBuilder);
 	private readonly service = inject(InterventionsService);
-	private readonly notification = inject(NotificationService);
+    private readonly notification = inject(NotificationService);
+    private readonly mecaniciensService = inject(MecaniciensService);
 
 	readonly loading = signal(true);
 	readonly saving = signal(false);
 	readonly dialogOpen = signal(false);
 	readonly intervention = signal<Intervention | null>(null);
+
+    readonly mecaniciens = signal<MecanicienListItem[]>([]);
+    readonly specialite = SPECIALITE_LIBELLES;
 
 	readonly form = this.fb.group({
 		mecanicienId: [null as number | null, [Validators.required, Validators.min(1)]],
@@ -48,6 +54,8 @@ export class InterventionsAffectationPage implements OnInit {
 				this.router.navigateByUrl('/interventions');
 			},
 		});
+
+        this.loadMecaniciens();
 	}
 
 	submit(): void {
@@ -90,6 +98,17 @@ export class InterventionsAffectationPage implements OnInit {
 				this.dialogOpen.set(false);
 				this.saving.set(false);
 			},
+		});
+	}
+
+
+	private loadMecaniciens(): void {
+		this.mecaniciensService.list(0, 200).subscribe({
+			next: (page) => {
+                this.mecaniciens.set(page.content);
+                console.log('Mécaniciens page', page.content);
+			},
+			error: () => this.mecaniciens.set([]),
 		});
 	}
 }

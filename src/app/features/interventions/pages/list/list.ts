@@ -1,5 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { HttpResponse } from '@angular/common/http';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Page } from '../../../../core/models/page.model';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
@@ -8,45 +10,76 @@ import { PaginatedTable } from '../../../../shared/ui/paginated-table/paginated-
 import { StatusTag } from '../../../../shared/ui/status-tag/status-tag';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { Intervention, STATUT_LIBELLES, TYPE_LIBELLES } from '../../models/intervention-view.model';
+import { Intervention, InterventionListFilters, STATUT_LIBELLES, StatutIntervention, TYPE_LIBELLES } from '../../models/intervention-view.model';
 import { InterventionsService } from '../../services/interventions.service';
+import { MecaniciensService } from '../../../mecaniciens/services/mecanicien.service';
+import { MecanicienListItem } from '../../../mecaniciens/models/mecanicien.model';
 
 @Component({
   selector: 'app-interventions-list-page',
   standalone: true,
-  imports: [CommonModule, RouterLink, PaginatedTable, StatusTag, LoadingSpinner, EmptyState, ConfirmationDialog],
+  imports: [CommonModule, FormsModule, RouterLink, PaginatedTable, StatusTag, LoadingSpinner, EmptyState, ConfirmationDialog],
   templateUrl: './list.html',
   styleUrls: ['./list.scss']
 })
 export class InterventionsListPage implements OnInit {
   private readonly service = inject(InterventionsService);
+  private readonly mecaniciensService = inject(MecaniciensService);
   private readonly notification = inject(NotificationService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(false);
+  readonly exporting = signal(false);
   readonly page = signal<Page<Intervention> | null>(null);
   readonly currentPage = signal(0);
   readonly pageSize = signal(20);
+  readonly currentSort = signal('dateDepot,DESC');
+  readonly mecaniciens = signal<MecanicienListItem[]>([]);
+  readonly filters = signal<InterventionListFilters>({
+    statut: null,
+    mecanicienId: null,
+    immatriculation: '',
+    q: '',
+    enRetard: false,
+  });
 
   readonly archiveTarget = signal<Intervention | null>(null);
   readonly archiving = signal(false);
 
-  readonly tableHeaders = ['Numéro', 'Véhicule', 'Type', 'Statut', 'Date dépôt', 'Actions'];
+  readonly tableHeaders = ['Numéro', 'Véhicule', 'Type', 'Statut', 'Etat', 'Date dépôt', 'Actions'];
+  readonly statuts = Object.entries(STATUT_LIBELLES).map(([value, label]) => ({
+    value: value as StatutIntervention,
+    label,
+  }));
+  readonly hasActiveFilters = computed(() => {
+    const filters = this.filters();
+    return Boolean(filters.statut || filters.mecanicienId || filters.immatriculation || filters.q || filters.enRetard);
+  });
 
   ngOnInit(): void {
+    this.loadMecaniciens();
     this.route.queryParams.subscribe((params) => {
       const p = Number(params['page'] ?? 0);
       const s = Number(params['size'] ?? 20);
+      const sort = String(params['sort'] ?? 'dateDepot,DESC');
       this.currentPage.set(p);
       this.pageSize.set(s);
-      this.load(p, s);
+      this.currentSort.set(sort);
+      this.filters.set({
+        statut: (params['statut'] as StatutIntervention | undefined) ?? null,
+        mecanicienId: params['mecanicienId'] ? Number(params['mecanicienId']) : null,
+        immatriculation: String(params['immatriculation'] ?? ''),
+        q: String(params['q'] ?? ''),
+        enRetard: params['enRetard'] === 'true',
+      });
+      this.load(p, s, sort);
     });
   }
 
-  load(page = 0, size = 20): void {
+  load(page = 0, size = 20, sort = this.currentSort()): void {
     this.loading.set(true);
-    this.service.list(page, size).subscribe({
+    this.service.list(this.filters(), page, size, sort).subscribe({
       next: (data) => {
         this.page.set(data);
         this.loading.set(false);
@@ -58,8 +91,46 @@ export class InterventionsListPage implements OnInit {
   goToPage(p: number): void {
     this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { page: p, size: this.pageSize() },
+      queryParams: { ...this.toQueryParams(this.filters()), page: p, size: this.pageSize(), sort: this.currentSort() },
       queryParamsHandling: 'merge',
+    });
+  }
+
+  applyFilters(): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { ...this.toQueryParams(this.filters()), page: 0, size: this.pageSize(), sort: this.currentSort() },
+      queryParamsHandling: '',
+    });
+  }
+
+  resetFilters(): void {
+    this.filters.set({ statut: null, mecanicienId: null, immatriculation: '', q: '', enRetard: false });
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: 0, size: this.pageSize(), sort: this.currentSort() },
+      queryParamsHandling: '',
+    });
+  }
+
+  updateFilter<K extends keyof InterventionListFilters>(key: K, value: InterventionListFilters[K]): void {
+    this.filters.update((current) => ({ ...current, [key]: value }));
+  }
+
+  exportCsv(): void {
+    if (this.exporting()) {
+      return;
+    }
+
+    this.exporting.set(true);
+    this.service.exportCsv(this.filters()).subscribe({
+      next: (response) => {
+        this.downloadCsv(response);
+        this.exporting.set(false);
+      },
+      error: () => {
+        this.exporting.set(false);
+      },
     });
   }
 
@@ -80,7 +151,7 @@ export class InterventionsListPage implements OnInit {
         this.notification.success(`Intervention ${target.numero} archivée.`);
         this.archiveTarget.set(null);
         this.archiving.set(false);
-        this.load(this.currentPage(), this.pageSize());
+        this.load(this.currentPage(), this.pageSize(), this.currentSort());
       },
       error: () => {
         this.archiving.set(false);
@@ -109,9 +180,17 @@ export class InterventionsListPage implements OnInit {
     return TYPE_LIBELLES[type as keyof typeof TYPE_LIBELLES] ?? type;
   }
 
+  isEnRetard(item: Intervention): boolean {
+    return item.enRetard;
+  }
+
   formatDate(iso: string | null): string {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
+  mecanicienLabel(item: MecanicienListItem): string {
+    return `${item.nom} — ${item.specialite}`;
   }
 
   get totalPages(): number {
@@ -120,6 +199,46 @@ export class InterventionsListPage implements OnInit {
 
   get pageRange(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i);
+  }
+
+  private loadMecaniciens(): void {
+    this.mecaniciensService.list().subscribe({
+      next: (page) => this.mecaniciens.set(page.content.filter((item) => item.actif)),
+      error: () => this.mecaniciens.set([]),
+    });
+  }
+
+  private toQueryParams(filters: InterventionListFilters): Record<string, string | number | boolean | null> {
+    return {
+      statut: filters.statut ?? null,
+      mecanicienId: filters.mecanicienId ?? null,
+      immatriculation: filters.immatriculation?.trim() ? filters.immatriculation.trim() : null,
+      q: filters.q?.trim() ? filters.q.trim() : null,
+      enRetard: filters.enRetard ? true : null,
+    };
+  }
+
+  private downloadCsv(response: HttpResponse<Blob>): void {
+    const blob = response.body;
+    if (!blob) {
+      this.notification.error('Export CSV vide ou indisponible.');
+      return;
+    }
+
+    const contentDisposition = response.headers.get('Content-Disposition') ?? '';
+    const fileName = this.extractFilename(contentDisposition) ?? 'interventions.csv';
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    this.notification.success('Export CSV généré.');
+  }
+
+  private extractFilename(contentDisposition: string): string | null {
+    const match = /filename="?([^";]+)"?/i.exec(contentDisposition);
+    return match?.[1] ?? null;
   }
 }
 
