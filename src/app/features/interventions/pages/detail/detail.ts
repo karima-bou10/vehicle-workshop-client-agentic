@@ -20,15 +20,7 @@ import {
   TransitionRequest,
 } from '../../models/intervention-view.model';
 import { InterventionsService } from '../../services/interventions.service';
-
-const WORKFLOW_STEPS = [
-  'Reçue',
-  'Diagnostic en cours',
-  'Devis à valider',
-  'En réparation',
-  'Terminée',
-  'Restituée',
-];
+import { SPECIALITE_LIBELLES } from '../../../mecaniciens/models/mecanicien.model';
 
 type DialogState = {
   kind: 'transition' | 'archive';
@@ -74,10 +66,11 @@ export class InterventionsDetailPage implements OnInit {
   readonly actionBusy = signal(false);
   readonly dialogState = signal<DialogState | null>(null);
 
-  readonly workflowSteps = WORKFLOW_STEPS;
+  readonly specialiteLibelles = SPECIALITE_LIBELLES;
 
   readonly currentStepIndex = computed(() => {
     const status = this.intervention()?.statut;
+    console.log('Current status:', status);
     switch (status) {
       case 'RECUE':
         return 0;
@@ -90,12 +83,26 @@ export class InterventionsDetailPage implements OnInit {
       case 'TERMINEE':
         return 4;
       case 'RESTITUEE':
-        return 5;
+        return 6;
       case 'ANNULEE':
         return -1;
       default:
         return 0;
     }
+  });
+
+  readonly workflowStepsLabel = computed(() => {
+    const iv = this.intervention();
+    const daigLabel = iv?.diagnostic?.trim()  ? 'Diagnostiquée' : 'Diagnostic en cours';
+    const devisLabel = iv?.coutEstime !== null ? 'Devis établi' : 'Devis à valider';
+    return [
+      'Reçue',
+      daigLabel,
+      devisLabel,
+      'En réparation',
+      'Terminée',
+      'Restituée',
+    ];
   });
 
   readonly isCancelled = computed(() => this.intervention()?.statut === 'ANNULEE');
@@ -109,11 +116,17 @@ export class InterventionsDetailPage implements OnInit {
     const totalPages = this.related()?.totalPages ?? 0;
     return Array.from({ length: totalPages }, (_, index) => index);
   });
-
+/*
   ngOnInit(): void {
     const numero = this.route.snapshot.paramMap.get('numero') ?? '';
     this.loadIntervention(numero);
-  }
+  }*/
+
+  ngOnInit(): void {
+   this.route.params.subscribe(params => {
+  this.loadIntervention(params['numero']);
+  });
+}
 
   private loadIntervention(numero: string): void {
     this.loading.set(true);

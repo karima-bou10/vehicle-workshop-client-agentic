@@ -1,4 +1,5 @@
 import type { StatutIntervention } from '../../../core/models/statut-intervention.model';
+import type { MecanicienListItem } from '../../mecaniciens/models/mecanicien.model';
 
 export type { StatutIntervention };
 
@@ -11,13 +12,6 @@ export type TypeIntervention =
   | 'AUTRE';
 
 export type PrioriteIntervention = 'BASSE' | 'NORMALE' | 'HAUTE' | 'URGENTE';
-
-export interface MecanicienResume {
-  nom: string;
-  specialite: string;
-  disponible: boolean;
-}
-
 export interface VehiculeResume {
   immatriculationFictive: string;
   marque: string;
@@ -37,8 +31,17 @@ export interface Intervention {
   dateDepot: string;
   dateRestitutionPrevue: string | null;
   dateCloture: string | null;
-  mecanicien: MecanicienResume | null;
+  mecanicien: MecanicienListItem | null;
   actif: boolean;
+  enRetard: boolean;
+}
+
+export interface InterventionListFilters {
+  statut?: StatutIntervention | null;
+  mecanicienId?: number | null;
+  immatriculation?: string | null;
+  q?: string | null;
+  enRetard?: boolean | null;
 }
 
 export interface TransitionRequest {
@@ -95,8 +98,8 @@ export const PRIORITE_LIBELLES: Record<PrioriteIntervention, string> = {
 
 export const STATUT_LIBELLES: Record<StatutIntervention, string> = {
   RECUE: 'Reçue',
-  DIAGNOSTIC_EN_COURS: 'Diagnostic en cours',
-  DEVIS_A_VALIDER: 'Devis à valider',
+  DIAGNOSTIC_EN_COURS: 'Diagnostiquée',
+  DEVIS_A_VALIDER: 'Devis établi',
   EN_REPARATION: 'En réparation',
   TERMINEE: 'Terminée',
   RESTITUEE: 'Restituée',

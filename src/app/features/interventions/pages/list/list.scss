@@ -13,6 +13,12 @@
   flex-wrap: wrap;
 }
 
+.list-page__header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .list-page__title {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 1.5rem;
@@ -59,6 +65,109 @@
   }
 }
 
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.65rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--surface-card) 86%, var(--surface-bg));
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 180ms ease, transform 100ms ease, background-color 180ms ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-action);
+    background: color-mix(in srgb, var(--color-action) 10%, var(--surface-card));
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+  }
+}
+
+.filters-card {
+  display: grid;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  border: 1px solid var(--border-soft);
+  background:
+    linear-gradient(160deg, color-mix(in srgb, var(--surface-card) 94%, transparent), color-mix(in srgb, var(--surface-bg) 55%, var(--surface-card)));
+  box-shadow: var(--shadow-soft);
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.9rem;
+}
+
+.filter-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.filter-field__label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.filter-field__input {
+  width: 100%;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.7rem;
+  padding: 0.72rem 0.85rem;
+  background: color-mix(in srgb, var(--surface-card) 72%, var(--surface-bg));
+  color: var(--text-primary);
+  font: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-action);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-action) 18%, transparent);
+  }
+}
+
+.filters-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.filters-actions__buttons {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+
+  input {
+    width: 1rem;
+    height: 1rem;
+    accent-color: var(--color-danger);
+  }
+}
+
 // ─── Table Wrapper ───────────────────────────────────────────────────────────
 
 .list-page__table-wrapper {
@@ -73,7 +182,7 @@
 
 .table-row {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1.1fr 0.9fr 1fr 0.9fr 0.9fr 1.15fr;
   gap: 0.5rem;
   align-items: center;
   padding: 0.75rem 1rem;
@@ -103,6 +212,10 @@
   white-space: nowrap;
 }
 
+.table-cell--retard {
+  overflow: visible;
+}
+
 .link-numero {
   font-family: 'Space Grotesk', monospace;
   font-size: 0.82rem;
@@ -126,6 +239,25 @@
   font-size: 0.75rem;
   color: var(--text-muted);
   font-family: monospace;
+}
+
+.retard-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.22rem 0.62rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--color-danger) 16%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-danger) 36%, transparent);
+  color: var(--color-danger);
+
+  &--neutral {
+    background: color-mix(in srgb, var(--surface-bg) 65%, var(--surface-card));
+    border-color: var(--border-soft);
+    color: var(--text-muted);
+  }
 }
 
 // ─── Action Buttons ───────────────────────────────────────────────────────────
@@ -216,4 +348,18 @@
   font-size: 0.82rem;
   color: var(--text-muted);
   margin-left: 0.5rem;
+}
+
+@media (max-width: 1100px) {
+  .table-row {
+    grid-template-columns: 1fr;
+  }
+
+  .table-cell {
+    white-space: normal;
+  }
+
+  .table-cell--actions {
+    flex-wrap: wrap;
+  }
 }

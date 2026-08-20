@@ -3,8 +3,8 @@ import { StatutIntervention } from '../../../core/models/statut-intervention.mod
 
 const STATUT_LIBELLES: Record<StatutIntervention, string> = {
   RECUE: 'Reçue',
-  DIAGNOSTIC_EN_COURS: 'Diagnostic en cours',
-  DEVIS_A_VALIDER: 'Devis à valider',
+  DIAGNOSTIC_EN_COURS: 'Diagnostiquée',
+  DEVIS_A_VALIDER: 'Devis établi',
   EN_REPARATION: 'En réparation',
   TERMINEE: 'Terminée',
   RESTITUEE: 'Restituée',

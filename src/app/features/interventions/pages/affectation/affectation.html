@@ -10,10 +10,12 @@
 		</header>
 
 		<form [formGroup]="form" class="workflow-form" (ngSubmit)="submit()">
-			<label>
-				<span>ID mécanicien</span>
-				<input type="number" min="1" formControlName="mecanicienId" placeholder="Identifiant technique" />
-			</label>
+            <select id="mecanicienId" formControlName="mecanicienId" class="field__input">
+                <option [ngValue]="null" disabled selected hidden>Sélectionner un mécanicien</option>
+                @for (m of mecaniciens(); track m.id) {
+                    <option [ngValue]="m.id">{{ m.nom }} — {{ specialite[m.specialite] }}</option>
+                }
+            </select>
 
 			@if (form.controls.mecanicienId.touched && form.controls.mecanicienId.invalid) {
 				<p class="workflow-form__error">Mécanicien obligatoire.</p>
