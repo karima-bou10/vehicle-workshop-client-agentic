@@ -12,7 +12,7 @@ import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/co
 import { NotificationService } from '../../../../core/services/notification.service';
 import { Intervention, InterventionListFilters, STATUT_LIBELLES, StatutIntervention, TYPE_LIBELLES } from '../../models/intervention-view.model';
 import { InterventionsService } from '../../services/interventions.service';
-import { MecaniciensService } from '../../../mecaniciens/services/mecanicien.service';
+import { MecaniciensService } from '../../../mecaniciens/services/mecaniciens.service';
 import { MecanicienListItem } from '../../../mecaniciens/models/mecanicien.model';
 
 @Component({
