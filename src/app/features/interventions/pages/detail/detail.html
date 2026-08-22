@@ -95,12 +95,11 @@
     <section class="detail-card detail-card--full detail-card--workflow">
       <div class="detail-card__title-row">
         <h2 class="detail-card__title">Workflow</h2>
-        <p class="detail-card__hint">Étape courante : {{ statutLibelle(iv.statut) }}</p>
       </div>
       @if(isCancelled()) {
         <p class="cancelled-banner">Intervention annulée</p>
       }
-      <app-workflow-stepper [steps]="workflowSteps" [activeIndex]="currentStepIndex()" />
+      <app-workflow-stepper [steps]="workflowStepsLabel()" [activeIndex]="currentStepIndex()" />
     </section>
 
     <div class="detail-page__grid">
@@ -133,7 +132,7 @@
             <div class="detail-dl__row">
               <dt>Mécanicien</dt>
               <dd>
-                {{ iv.mecanicien.nom }} · {{ iv.mecanicien.specialite }}
+                {{ iv.mecanicien.nom }} — {{ specialiteLibelles[iv.mecanicien.specialite]}}
                 <span class="field-note" [class.field-note--available]="iv.mecanicien.disponible">
                   {{ iv.mecanicien.disponible ? 'Disponible' : 'Indisponible' }}
                 </span>

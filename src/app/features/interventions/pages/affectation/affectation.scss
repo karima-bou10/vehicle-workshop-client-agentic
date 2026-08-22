@@ -8,6 +8,21 @@
 	gap: 1rem;
 }
 
+.field__input {
+    font: inherit;
+    border: 1.5px solid var(--border-soft);
+    border-radius: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--surface-bg);
+    color: var(--text-primary);
+    width: 100%;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+.optional {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 0.8rem;
+}
 .feature-card__header {
 	display: flex;
 	align-items: flex-start;

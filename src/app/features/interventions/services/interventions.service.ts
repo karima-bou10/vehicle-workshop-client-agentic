@@ -7,6 +7,7 @@ import {
   HistoriqueInterventionResponse,
   Intervention,
   InterventionCreateRequest,
+  InterventionListFilters,
   InterventionUpdateRequest,
   MecanicienAffectationRequest,
   TransitionRequest,
@@ -17,12 +18,23 @@ export class InterventionsService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/interventions`;
 
-  list(page = 0, size = 20, sort = 'dateDepot,DESC'): Observable<Page<Intervention>> {
-    const params = new HttpParams()
+  list(filters: InterventionListFilters, page = 0, size = 20, sort = 'dateDepot,DESC'): Observable<Page<Intervention>> {
+    let params = new HttpParams()
       .set('page', page)
       .set('size', size)
       .set('sort', sort);
+
+    params = this.appendFilterParams(params, filters);
     return this.http.get<Page<Intervention>>(this.baseUrl, { params });
+  }
+
+  exportCsv(filters: InterventionListFilters) {
+    const params = this.appendFilterParams(new HttpParams(), filters);
+    return this.http.get(`${this.baseUrl}/export`, {
+      params,
+      observe: 'response' as const,
+      responseType: 'blob' as const,
+    });
   }
 
   getByNumero(numero: string): Observable<Intervention> {
@@ -69,6 +81,28 @@ export class InterventionsService {
     return this.http.get<Page<Intervention>>(`${this.baseUrl}/${numero}/autres-interventions-vehicule`, { params });
   }
 
+  private appendFilterParams(params: HttpParams, filters: InterventionListFilters): HttpParams {
+    let next = params;
+
+    if (filters.statut) {
+      next = next.set('statut', filters.statut);
+    }
+    if (filters.mecanicienId) {
+      next = next.set('mecanicienId', filters.mecanicienId);
+    }
+    if (filters.immatriculation?.trim()) {
+      next = next.set('immatriculation', filters.immatriculation.trim());
+    }
+    if (filters.q?.trim()) {
+      next = next.set('q', filters.q.trim());
+    }
+    if (filters.enRetard) {
+      next = next.set('enRetard', 'true');
+    }
+
+    return next;
+  }
+
   parMecanicien(
     mecanicienId: number,
     page = 0,
@@ -79,4 +113,3 @@ export class InterventionsService {
     return this.http.get<Page<Intervention>>(`${this.baseUrl}/mecanicien/${mecanicienId}`, { params });
   }
 }
-

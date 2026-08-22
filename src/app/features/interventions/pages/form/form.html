@@ -1,18 +1,18 @@
 <div class="form-page">
 
   <header class="form-page__header">
+    <div>
     <h1 class="form-page__title">
       {{ isEdit ? 'Modifier l\'intervention' : 'Nouvelle intervention' }}
     </h1>
     @if (isEdit) {
-      <p class="form-page__subtitle form-page__subtitle--mono">{{ editNumero() }}</p>
-      @if (statusLabel(); as status) {
-        <p class="form-page__subtitle">Statut courant : {{ status }}</p>
-      }
+      <p >{{ editNumero() }}</p>
+
       @if (!canEditForm()) {
         <p class="form-page__subtitle">Intervention en lecture seule.</p>
       }
     }
+    </div>
   </header>
 
   @if (loading()) {
@@ -111,15 +111,6 @@
           <span class="field__error" role="alert">Date obligatoire et non future.</span>
         }
       </div>
-      }
-
-      @if (isEdit && sourceIntervention(); as iv) {
-        <div class="field field--full">
-          <label class="field__label">Informations verrouillées par le workflow</label>
-          <div class="field__input field__input--readonly">
-            Diagnostic : {{ iv.diagnostic ?? '—' }} · Coût estimé : {{ iv.coutEstime ?? '—' }} · Restitution prévue : {{ iv.dateRestitutionPrevue ? (iv.dateRestitutionPrevue | date:'short':'':'fr-FR') : '—' }}
-          </div>
-        </div>
       }
 
       <!-- Actions -->

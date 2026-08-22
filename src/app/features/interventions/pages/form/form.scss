@@ -8,10 +8,20 @@
 
 .form-page__header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 1rem;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+  
+    h1 {
+      margin: 0;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+  
+    p {
+      margin: 0.25rem 0 0;
+      color: var(--text-muted);
+    }
 }
 
 .breadcrumb-link {

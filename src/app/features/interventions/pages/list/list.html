@@ -5,8 +5,69 @@
       <h1 class="list-page__title">Interventions</h1>
       <p class="list-page__subtitle">Suivi des interventions atelier</p>
     </div>
-    <a routerLink="/interventions/nouveau" class="btn-primary">+ Nouvelle intervention</a>
+    <div class="list-page__header-actions">
+      <button type="button" class="btn-secondary" [disabled]="exporting()" (click)="exportCsv()">
+        {{ exporting() ? 'Export en cours…' : 'Exporter CSV' }}
+      </button>
+      <a routerLink="/interventions/nouveau" class="btn-primary">+ Nouvelle intervention</a>
+    </div>
   </header>
+
+  <section class="filters-card">
+    <div class="filters-grid">
+      <label class="filter-field">
+        <span class="filter-field__label">Statut</span>
+        <select class="filter-field__input" [ngModel]="filters().statut ?? ''" (ngModelChange)="updateFilter('statut', $event || null)">
+          <option value="">Tous les statuts</option>
+          @for (statut of statuts; track statut.value) {
+            <option [value]="statut.value">{{ statut.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span class="filter-field__label">Mécanicien</span>
+        <select class="filter-field__input" [ngModel]="filters().mecanicienId ?? ''" (ngModelChange)="updateFilter('mecanicienId', $event ? +$event : null)">
+          <option value="">Tous les mécaniciens</option>
+          @for (mecanicien of mecaniciens(); track mecanicien.id) {
+            <option [value]="mecanicien.id">{{ mecanicienLabel(mecanicien) }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="filter-field">
+        <span class="filter-field__label">Véhicule</span>
+        <input
+          class="filter-field__input"
+          type="text"
+          placeholder="Immatriculation, marque ou modèle"
+          [ngModel]="filters().immatriculation ?? ''"
+          (ngModelChange)="updateFilter('immatriculation', $event)" />
+      </label>
+
+      <label class="filter-field">
+        <span class="filter-field__label">Recherche texte</span>
+        <input
+          class="filter-field__input"
+          type="text"
+          placeholder="Numéro ou description client"
+          [ngModel]="filters().q ?? ''"
+          (ngModelChange)="updateFilter('q', $event)" />
+      </label>
+    </div>
+
+    <div class="filters-actions">
+      <label class="filter-toggle">
+        <input type="checkbox" [ngModel]="filters().enRetard ?? false" (ngModelChange)="updateFilter('enRetard', $event)" />
+        <span>En retard uniquement</span>
+      </label>
+
+      <div class="filters-actions__buttons">
+        <button type="button" class="btn-secondary" (click)="resetFilters()" [disabled]="!hasActiveFilters()">Réinitialiser</button>
+        <button type="button" class="btn-primary" (click)="applyFilters()">Appliquer</button>
+      </div>
+    </div>
+  </section>
 
   @if (loading()) {
     <div class="list-page__center">
@@ -33,6 +94,13 @@
             <span class="table-cell">{{ typeLibelle(item.type) }}</span>
             <span class="table-cell">
               <app-status-tag [statut]="item.statut" />
+            </span>
+            <span class="table-cell table-cell--retard">
+              @if (isEnRetard(item)) {
+                <span class="retard-badge">En retard</span>
+              } @else {
+                <span class="retard-badge retard-badge--neutral">À l'heure</span>
+              }
             </span>
             <span class="table-cell" style="font-size: 0.82rem;">{{ formatDate(item.dateDepot) }}</span>
             <span class="table-cell table-cell--actions">
