@@ -32,7 +32,7 @@
     </label>
 
     <footer class="dialog-actions">
-      <button type="button" class="ghost-button" (click)="onCancel()">
+      <button *ngIf="!hideCancel()" type="button" class="ghost-button" (click)="onCancel()">
         {{ cancelLabel() }}
       </button>
       <button

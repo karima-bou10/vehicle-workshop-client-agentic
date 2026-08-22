@@ -1,16 +1,366 @@
-.feature-card {
-  background: var(--surface-card);
-  border: 1px solid var(--border-soft);
-  border-radius: 1rem;
-  padding: 1.2rem;
-  box-shadow: var(--shadow-soft);
+// ─── Page Layout ─────────────────────────────────────────────────────────────
+
+.list-page {
+  display: grid;
+  gap: 1.25rem;
 }
 
-h1 {
+.list-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.list-page__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin: 0;
 }
 
-p {
-  margin: 0.4rem 0 0;
+.list-page__subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.875rem;
   color: var(--text-muted);
 }
+
+.list-page__center {
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+}
+
+// ─── Search Zone ─────────────────────────────────────────────────────────────
+
+.search-zone {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: color-mix(in srgb, var(--surface-card) 96%, transparent);
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  padding: 1rem 1.1rem;
+  box-shadow: var(--shadow-soft);
+}
+
+.search-zone__field {
+  display: grid;
+  gap: 0.35rem;
+  min-width: 12rem;
+  flex: 1 1 14rem;
+
+  label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-muted);
+  }
+}
+
+.search-input,
+.search-select {
+  font: inherit;
+  padding: 0.55rem 0.75rem;
+  border-radius: 0.65rem;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-bg);
+  color: var(--text-primary);
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+
+  &:focus {
+    outline: none;
+    border-color: var(--color-action);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-action) 18%, transparent);
+  }
+}
+
+.search-zone__reset {
+  font: inherit;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-radius: 0.65rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-action);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// ─── Filters ─────────────────────────────────────────────────────────────────
+
+.list-page__filters {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.list-page__filters-label {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-right: 0.2rem;
+}
+
+.list-page__filters-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.filter-chip {
+  font: inherit;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+
+  &:hover {
+    border-color: var(--color-action);
+  }
+
+  &--active {
+    background: var(--color-action);
+    border-color: var(--color-action);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+// ─── CTA Button ──────────────────────────────────────────────────────────────
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.65rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, var(--color-action), #2a78d4);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(31, 93, 170, 0.3);
+  transition: box-shadow 180ms ease, transform 100ms ease;
+  white-space: nowrap;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(31, 93, 170, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ─── Table Wrapper ───────────────────────────────────────────────────────────
+
+.list-page__table-wrapper {
+  background: var(--surface-card);
+  border: 1px solid var(--border-soft);
+  border-radius: 1rem;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+// ─── Table Rows ──────────────────────────────────────────────────────────────
+
+.table-row {
+  display: grid;
+  grid-template-columns: 1.2fr 1.4fr 1fr 2fr;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid var(--border-soft);
+  transition: background-color 160ms ease;
+
+  &:first-of-type {
+    border-top: none;
+  }
+
+  &:hover {
+    background: var(--surface-bg);
+  }
+}
+
+.table-cell {
+  font-size: 0.875rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.table-cell--actions {
+  display: flex;
+  gap: 0.4rem;
+  overflow: visible;
+  white-space: nowrap;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.link-nom {
+  font-weight: 600;
+  color: var(--color-action);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+// ─── Disponibilité badge ─────────────────────────────────────────────────────
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+  color: var(--color-danger);
+
+  &--disponible {
+    background: color-mix(in srgb, var(--color-done) 12%, transparent);
+    color: var(--color-done);
+  }
+}
+
+// ─── Action Buttons ───────────────────────────────────────────────────────────
+
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.28rem 0.6rem;
+  border-radius: 0.45rem;
+  font-size: 0.78rem;
+  font-weight: 500;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  font: inherit;
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &--view {
+    background: color-mix(in srgb, var(--color-action) 10%, transparent);
+    color: var(--color-action);
+    border-color: color-mix(in srgb, var(--color-action) 25%, transparent);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-action) 18%, transparent);
+    }
+  }
+
+  &--edit {
+    background: color-mix(in srgb, var(--color-wait) 10%, transparent);
+    color: var(--color-wait);
+    border-color: color-mix(in srgb, var(--color-wait) 25%, transparent);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-wait) 18%, transparent);
+    }
+  }
+
+  &--toggle {
+    background: color-mix(in srgb, var(--color-done) 10%, transparent);
+    color: var(--color-done);
+    border-color: color-mix(in srgb, var(--color-done) 25%, transparent);
+
+    &:hover:not(:disabled) {
+      background: color-mix(in srgb, var(--color-done) 18%, transparent);
+    }
+  }
+
+  &--deactivate {
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+    color: var(--color-danger);
+    border-color: color-mix(in srgb, var(--color-danger) 25%, transparent);
+
+    &:hover {
+      background: color-mix(in srgb, var(--color-danger) 18%, transparent);
+    }
+  }
+}
+
+// ─── Pagination ───────────────────────────────────────────────────────────────
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.pagination__btn {
+  font: inherit;
+  border: 1px solid var(--border-soft);
+  background: var(--surface-card);
+  color: var(--text-primary);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background-color 150ms ease, border-color 150ms ease;
+
+  &:hover:not(:disabled) {
+    background: var(--surface-bg);
+    border-color: var(--color-action);
+  }
+
+  &--active {
+    background: var(--color-action);
+    border-color: var(--color-action);
+    color: #fff;
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+}
+
+.pagination__info {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-left: 0.5rem;
+}
+
+@media (max-width: 760px) {
+  .table-row {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .table-cell--actions {
+    justify-content: flex-start;
+  }
+}
+
