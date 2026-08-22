@@ -17,6 +17,7 @@ export class ConfirmationDialog {
   readonly cancelLabel = input('Annuler');
   readonly requireReason = input(false);
   readonly reasonPlaceholder = input('Saisissez un motif');
+  readonly hideCancel = input(false);
 
   readonly confirm = output<string>();
   readonly cancel = output<void>();

@@ -1,0 +1,160 @@
+<div class="detail-page">
+  @if (loading()) {
+    <div class="detail-page__center">
+      <app-loading-spinner />
+    </div>
+  } @else if (loadError()) {
+    <p class="detail-page__subtitle">Mécanicien introuvable ou erreur de chargement.</p>
+    <a routerLink="/mecaniciens" class="action-button action-button--secondary">Retour</a>
+  } @else if (mecanicien(); as m) {
+    <header class="detail-page__header">
+      <div class="detail-page__title-row">
+        <div>
+          <h1 class="detail-page__nom">{{ m.nom }}</h1>
+          <p class="detail-page__subtitle">
+            {{ specialiteLibelle(m.specialite) }}
+            @if (!m.actif) {
+              <span class="badge-archive">Désactivé</span>
+            }
+          </p>
+        </div>
+
+        <div class="action-grid">
+          <a routerLink="/mecaniciens" class="action-button action-button--secondary">Retour</a>
+
+          @if (m.actif) {
+            <ng-container *appHasRole="'ROLE_MANAGER'">
+              <a [routerLink]="['/mecaniciens', m.id, 'modifier']" class="action-button action-button--secondary">
+                Modifier
+              </a>
+              <button
+                type="button"
+                class="action-button"
+                [class.action-button--success]="!m.disponible"
+                [class.action-button--warning]="m.disponible"
+                [disabled]="actionBusy()"
+                (click)="toggleDisponibilite()">
+                {{ m.disponible ? 'Marquer indisponible' : 'Marquer disponible' }}
+              </button>
+              <button
+                type="button"
+                class="action-button action-button--danger"
+                [disabled]="actionBusy()"
+                (click)="openDeactivateDialog()">
+                Désactiver
+              </button>
+            </ng-container>
+          }
+        </div>
+      </div>
+    </header>
+
+    <div class="detail-page__grid">
+      <section class="detail-card">
+        <h2 class="detail-card__title">Informations</h2>
+        <dl class="detail-dl">
+          <div class="detail-dl__row">
+            <dt>Nom</dt>
+            <dd>{{ m.nom }}</dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Spécialité</dt>
+            <dd>{{ specialiteLibelle(m.specialite) }}</dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Disponibilité</dt>
+            <dd>
+              <span class="badge" [class.badge--disponible]="m.disponible">
+                {{ m.disponible ? 'Disponible' : 'Indisponible' }}
+              </span>
+            </dd>
+          </div>
+          <div class="detail-dl__row">
+            <dt>Statut</dt>
+            <dd>{{ m.actif ? 'Actif' : 'Désactivé' }}</dd>
+          </div>
+        </dl>
+      </section>
+    </div>
+
+    <section class="detail-card detail-card--full">
+      <div class="detail-card__title-row">
+        <h2 class="detail-card__title">Interventions du mécanicien</h2>
+        <p class="detail-card__hint">Interventions assignées à ce mécanicien.</p>
+      </div>
+
+      @if (interventionsLoading()) {
+        <div class="section-center">
+          <app-loading-spinner />
+        </div>
+      } @else if (interventionsError()) {
+        <app-empty-state message="Impossible de charger les interventions de ce mécanicien." />
+      } @else if (interventionsPage(); as ip) {
+        @if (ip.content.length === 0) {
+          <app-empty-state message="Aucune intervention en cours pour ce mécanicien." />
+        } @else {
+          <app-paginated-table [headers]="['Numéro', 'Véhicule', 'Type', 'Statut', 'Priorité', 'Dépôt']">
+            @for (item of ip.content; track item.numero) {
+              <div class="table-row table-row--mecanicien-interventions">
+                <span class="table-cell table-cell--strong">
+                  <a [routerLink]="['/interventions', item.numero]" class="link-numero">{{ item.numero }}</a>
+                </span>
+                <span class="table-cell">{{ item.vehicule.marque }} {{ item.vehicule.modele }} · {{ item.vehicule.immatriculationFictive }}</span>
+                <span class="table-cell">{{ typeLibelle(item.type) }}</span>
+                <span class="table-cell"><app-status-tag [statut]="item.statut" /></span>
+                <span class="table-cell">{{ prioriteLibelle(item.priorite) }}</span>
+                <span class="table-cell">{{ formatDate(item.dateDepot) }}</span>
+              </div>
+            }
+          </app-paginated-table>
+
+          @if (interventionsTotalPages > 1) {
+            <nav class="pagination" aria-label="Pagination interventions du mécanicien">
+              <button type="button" class="pagination__btn" [disabled]="ip.number === 0" (click)="goToInterventionsPage(ip.number - 1)">
+                ‹ Préc.
+              </button>
+
+              @for (p of interventionsPageRange; track p) {
+                <button type="button" class="pagination__btn" [class.pagination__btn--active]="p === ip.number" (click)="goToInterventionsPage(p)">
+                  {{ p + 1 }}
+                </button>
+              }
+
+              <button type="button" class="pagination__btn" [disabled]="ip.number >= interventionsTotalPages - 1" (click)="goToInterventionsPage(ip.number + 1)">
+                Suiv. ›
+              </button>
+
+              <span class="pagination__info">
+                Page {{ ip.number + 1 }} / {{ interventionsTotalPages }} · {{ ip.totalElements }} interventions
+              </span>
+            </nav>
+          }
+        }
+      }
+    </section>
+
+    @if (deactivateDialogOpen()) {
+      <app-confirmation-dialog
+        [open]="deactivateDialogOpen()"
+        title="Désactiver le mécanicien ?"
+        [message]="deactivateMessage(m)"
+        variant="alert"
+        confirmLabel="Désactiver"
+        cancelLabel="Retour"
+        (confirm)="doDeactivate()"
+        (cancel)="cancelDeactivate()" />
+    }
+
+    @if (blocked()) {
+      <app-confirmation-dialog
+        [open]="blocked()"
+        title="Désactivation impossible"
+        [message]="blockedMessage(m)"
+        variant="info"
+        confirmLabel="Fermer"
+        [hideCancel]="true"
+        (confirm)="closeBlockedDialog()"
+        (cancel)="closeBlockedDialog()" />
+    }
+  }
+</div>

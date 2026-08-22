@@ -68,5 +68,15 @@ export class InterventionsService {
     const params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
     return this.http.get<Page<Intervention>>(`${this.baseUrl}/${numero}/autres-interventions-vehicule`, { params });
   }
+
+  parMecanicien(
+    mecanicienId: number,
+    page = 0,
+    size = 10,
+    sort = 'dateDepot,DESC'
+  ): Observable<Page<Intervention>> {
+    const params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
+    return this.http.get<Page<Intervention>>(`${this.baseUrl}/mecanicien/${mecanicienId}`, { params });
+  }
 }
 
