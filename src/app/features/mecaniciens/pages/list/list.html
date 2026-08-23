@@ -1,4 +1,183 @@
-<section class="feature-card">
-  <h1>{{ t('mecaniciens.title') }}</h1>
-  <p>{{ t('mecaniciens.subtitle') }}</p>
-</section>
+<div class="list-page">
+
+  <header class="list-page__header">
+    <div>
+      <h1 class="list-page__title">{{ t('mecaniciens.title') }}</h1>
+      <p class="list-page__subtitle">{{ t('mecaniciens.subtitle') }}</p>
+    </div>
+    <a *appHasRole="'ROLE_MANAGER'" routerLink="/mecaniciens/nouveau" class="btn-primary">+ Nouveau mécanicien</a>
+  </header>
+
+  <div class="search-zone">
+    <div class="search-zone__field">
+      <label for="mecanicien-nom-search">Nom</label>
+      <input
+        id="mecanicien-nom-search"
+        type="text"
+        class="search-input"
+        placeholder="Rechercher un nom…"
+        [value]="nomInputValue()"
+        (input)="onNomInput($any($event.target).value)" />
+    </div>
+    <div class="search-zone__field">
+      <label for="mecanicien-specialite-search">Spécialité</label>
+      <select
+        id="mecanicien-specialite-search"
+        class="search-select"
+        [value]="specialiteQuery()"
+        (change)="onSpecialiteChange($any($event.target).value)">
+        <option value="">Toutes les spécialités</option>
+        @for (s of specialites; track s.value) {
+          <option [value]="s.value">{{ s.label }}</option>
+        }
+      </select>
+    </div>
+    <button
+      type="button"
+      class="search-zone__reset"
+      [disabled]="!isSearchActive()"
+      (click)="resetSearch()">
+      Réinitialiser
+    </button>
+  </div>
+
+  <div class="list-page__filters">
+    <span class="list-page__filters-label">Disponibilité :</span>
+    <button
+      type="button"
+      class="filter-chip"
+      [class.filter-chip--active]="disponibiliteFilter() === 'TOUS'"
+      (click)="setDisponibiliteFilter('TOUS')">
+      Tous
+    </button>
+    <button
+      type="button"
+      class="filter-chip"
+      [class.filter-chip--active]="disponibiliteFilter() === 'DISPONIBLE'"
+      [disabled]="isSearchActive()"
+      (click)="setDisponibiliteFilter('DISPONIBLE')">
+      Disponible
+    </button>
+    <button
+      type="button"
+      class="filter-chip"
+      [class.filter-chip--active]="disponibiliteFilter() === 'INDISPONIBLE'"
+      [disabled]="isSearchActive()"
+      (click)="setDisponibiliteFilter('INDISPONIBLE')">
+      Indisponible
+    </button>
+    @if (isSearchActive()) {
+      <span class="list-page__filters-hint">Filtre disponibilité désactivé pendant une recherche.</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="list-page__center">
+      <app-loading-spinner />
+    </div>
+  } @else if (loadError()) {
+    <app-empty-state message="Impossible de charger la liste des mécaniciens. Réessayez plus tard." />
+  } @else if (!page() || page()!.content.length === 0) {
+    <app-empty-state [message]="isSearchActive() ? 'Aucun mécanicien ne correspond à cette recherche.' : 'Aucun mécanicien actif pour le moment.'" />
+  } @else {
+    <div class="list-page__table-wrapper">
+      <app-paginated-table [headers]="tableHeaders">
+        @for (item of page()!.content; track item.id) {
+          <div class="table-row">
+            <span class="table-cell">
+              <a [routerLink]="['/mecaniciens', item.id]" class="link-nom">{{ item.nom }}</a>
+            </span>
+            <span class="table-cell">{{ specialiteLibelle(item.specialite) }}</span>
+            <span class="table-cell">
+              <span class="badge" [class.badge--disponible]="item.disponible">
+                {{ item.disponible ? 'Disponible' : 'Indisponible' }}
+              </span>
+            </span>
+            <span class="table-cell table-cell--actions">
+              <a [routerLink]="['/mecaniciens', item.id]" class="btn-action btn-action--view" title="Voir le détail">
+                Détail
+              </a>
+              <ng-container *appHasRole="'ROLE_MANAGER'">
+                <a [routerLink]="['/mecaniciens', item.id, 'modifier']" class="btn-action btn-action--edit" title="Modifier">
+                  Modifier
+                </a>
+                <button
+                  type="button"
+                  class="btn-action btn-action--toggle"
+                  [disabled]="togglingId() === item.id"
+                  (click)="toggleDisponibilite(item)"
+                  title="Basculer la disponibilité">
+                  {{ item.disponible ? 'Marquer indisponible' : 'Marquer disponible' }}
+                </button>
+                <button type="button" class="btn-action btn-action--deactivate" title="Désactiver" (click)="confirmDeactivate(item)">
+                  Désactiver
+                </button>
+              </ng-container>
+            </span>
+          </div>
+        }
+      </app-paginated-table>
+    </div>
+
+    @if (totalPages > 1) {
+      <nav class="pagination" aria-label="Pagination">
+        <button
+          type="button"
+          class="pagination__btn"
+          [disabled]="currentPage() === 0"
+          (click)="goToPage(currentPage() - 1)">
+          ‹ Préc.
+        </button>
+
+        @for (p of pageRange; track p) {
+          <button
+            type="button"
+            class="pagination__btn"
+            [class.pagination__btn--active]="p === currentPage()"
+            (click)="goToPage(p)">
+            {{ p + 1 }}
+          </button>
+        }
+
+        <button
+          type="button"
+          class="pagination__btn"
+          [disabled]="currentPage() >= totalPages - 1"
+          (click)="goToPage(currentPage() + 1)">
+          Suiv. ›
+        </button>
+
+        <span class="pagination__info">
+          Page {{ currentPage() + 1 }} / {{ totalPages }}
+          &nbsp;·&nbsp; {{ page()!.totalElements }} résultats
+        </span>
+      </nav>
+    }
+  }
+
+  @if (deactivateTarget()) {
+    <app-confirmation-dialog
+      [open]="!!deactivateTarget()"
+      title="Désactiver le mécanicien ?"
+      [message]="deactivateDialogMessage(deactivateTarget()!)"
+      variant="alert"
+      confirmLabel="Désactiver"
+      cancelLabel="Retour"
+      (confirm)="doDeactivate()"
+      (cancel)="cancelDeactivate()" />
+  }
+
+  @if (blockedMecanicien()) {
+    <app-confirmation-dialog
+      [open]="!!blockedMecanicien()"
+      title="Désactivation impossible"
+      [message]="blockedMessage(blockedMecanicien()!)"
+      variant="info"
+      confirmLabel="Fermer"
+      [hideCancel]="true"
+      (confirm)="closeBlockedDialog()"
+      (cancel)="closeBlockedDialog()" />
+  }
+
+</div>
+

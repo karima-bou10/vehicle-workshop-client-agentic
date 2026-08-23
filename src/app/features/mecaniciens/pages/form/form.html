@@ -1,0 +1,64 @@
+<div class="form-page">
+
+  <header class="form-page__header">
+    <h1 class="form-page__title">
+      {{ isEdit ? 'Modifier le mécanicien' : 'Nouveau mécanicien' }}
+    </h1>
+  </header>
+
+  @if (loading()) {
+    <div class="form-page__center">
+      <app-loading-spinner />
+    </div>
+  } @else if (loadError()) {
+    <p class="form-page__subtitle">Impossible de charger ce mécanicien.</p>
+    <a routerLink="/mecaniciens" class="btn-cancel">Retour à la liste</a>
+  } @else {
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate class="form-card">
+
+      <!-- Nom -->
+      <div class="field field--full" [class.field--erreur]="isInvalid('nom')">
+        <label class="field__label" for="nom">Nom <span class="required">*</span></label>
+        <input
+          id="nom"
+          type="text"
+          formControlName="nom"
+          class="field__input"
+          placeholder="Nom du mécanicien"
+        />
+        @if (isInvalid('nom')) {
+          <span class="field__error" role="alert">Le nom est obligatoire (2 à 100 caractères).</span>
+        }
+      </div>
+
+      <!-- Spécialité -->
+      <div class="field field--full" [class.field--erreur]="isInvalid('specialite')">
+        <label class="field__label" for="specialite">Spécialité <span class="required">*</span></label>
+        <select id="specialite" formControlName="specialite" class="field__input">
+          <option value="" disabled selected hidden>Sélectionner une spécialité</option>
+          @for (s of specialites; track s.value) {
+            <option [value]="s.value">{{ s.label }}</option>
+          }
+        </select>
+        @if (isInvalid('specialite')) {
+          <span class="field__error" role="alert">La spécialité est obligatoire.</span>
+        }
+      </div>
+
+      <!-- Actions -->
+      <div class="form-card__actions">
+        <a routerLink="/mecaniciens" class="btn-cancel">Annuler</a>
+        <button type="submit" class="btn-submit" [disabled]="submitting()">
+          @if (submitting()) {
+            <app-loading-spinner />
+          } @else {
+            {{ isEdit ? 'Enregistrer les modifications' : 'Créer le mécanicien' }}
+          }
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>

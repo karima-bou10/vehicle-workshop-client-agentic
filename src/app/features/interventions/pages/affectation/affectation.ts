@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, OnInit, signal } from '@angular/core';
-import { MecaniciensService } from '../../../mecaniciens/services/mecanicien.service';
+import { MecaniciensService } from '../../../mecaniciens/services/mecaniciens.service';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';

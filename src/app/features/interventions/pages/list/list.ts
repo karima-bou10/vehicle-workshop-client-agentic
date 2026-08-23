@@ -20,7 +20,7 @@ import {
   TYPE_LIBELLES,
 } from '../../models/intervention-view.model';
 import { InterventionsService } from '../../services/interventions.service';
-import { MecaniciensService } from '../../../mecaniciens/services/mecanicien.service';
+import { MecaniciensService } from '../../../mecaniciens/services/mecaniciens.service';
 import { MecanicienListItem } from '../../../mecaniciens/models/mecanicien.model';
 
 type VueInterventions = 'liste' | 'board';
