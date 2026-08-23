@@ -6,6 +6,19 @@
   box-shadow: var(--shadow-soft);
 }
 
+.list-page__title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.list-page__subtitle {
+  margin: 0.2rem 0 0;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
 h1 {
   margin: 0;
 }
@@ -13,4 +26,31 @@ h1 {
 p {
   margin: 0.4rem 0 0;
   color: var(--text-muted);
+}
+
+.dashboard-header {
+  margin-bottom: 1.2rem;
+}
+
+.dashboard-section {
+  margin-bottom: 1.2rem;
+}
+
+.dashboard-section__title {
+  margin: 0 0 0.8rem;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 720px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
 }

@@ -1,0 +1,68 @@
+.table-loading {
+  display: flex;
+  justify-content: center;
+  padding: 1.5rem 0;
+}
+
+.retards-table__wrapper {
+  overflow-x: auto;
+}
+
+.table-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.table-cell {
+  font-size: 0.9rem;
+  color: var(--text-primary);
+}
+
+.vehicule-immat {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: 0.8rem;
+}
+
+.pagination__btn {
+  border: 1px solid var(--border-soft);
+  background: var(--surface-card);
+  border-radius: 0.4rem;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  color: var(--text-primary);
+}
+
+.pagination__btn--active {
+  background: var(--color-action);
+  color: #fff;
+  border-color: var(--color-action);
+}
+
+.pagination__btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination__info {
+  margin-left: auto;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+@media (max-width: 640px) {
+  .table-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
