@@ -1,0 +1,14 @@
+@if (loading()) {
+  <div class="kpi-cards__loading">
+    <app-loading-spinner />
+  </div>
+} @else {
+  <div class="kpi-cards">
+    @for (def of cardDefs; track def.key) {
+      <div class="kpi-card" [class]="'kpi-card--' + def.variant">
+        <span class="kpi-card__label">{{ t(def.labelKey) }}</span>
+        <span class="kpi-card__value">{{ value(def) }}</span>
+      </div>
+    }
+  </div>
+}

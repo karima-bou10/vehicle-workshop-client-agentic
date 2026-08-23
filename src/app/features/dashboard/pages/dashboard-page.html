@@ -1,4 +1,39 @@
-<section class="feature-card">
-  <h1>{{ t('dashboard.title') }}</h1>
-  <p>{{ t('dashboard.subtitle') }}</p>
+<header class="dashboard-header">
+    <div>
+      <h1 class="list-page__title">{{ t('dashboard.title') }}</h1>
+      <p class="list-page__subtitle">{{ t('dashboard.subtitle') }}</p>
+    </div>
+</header>
+
+<section class="feature-card dashboard-section">
+  <app-kpi-cards [kpis]="kpis()" [loading]="kpisLoading()" />
 </section>
+
+<div class="dashboard-grid">
+  <section class="feature-card dashboard-section">
+    <h2 class="dashboard-section__title">{{ t('dashboard.types.title') }}</h2>
+    <app-repartition-types-chart [items]="repartitionTypes()" [loading]="repartitionTypesLoading()" />
+  </section>
+
+  <section class="feature-card dashboard-section">
+    <h2 class="dashboard-section__title">{{ t('dashboard.statuts.title') }}</h2>
+    <app-repartition-statuts-chart [items]="repartitionStatuts()" [loading]="repartitionStatutsLoading()" />
+  </section>
+</div>
+
+<section class="feature-card dashboard-section">
+  <h2 class="dashboard-section__title">{{ t('dashboard.charge.title') }}</h2>
+  <app-charge-mecaniciens-chart [items]="chargeMecaniciens()" [loading]="chargeMecaniciensLoading()" />
+</section>
+
+<section class="feature-card dashboard-section">
+  <h2 class="dashboard-section__title">{{ t('dashboard.retards.title') }}</h2>
+  <app-retards-table [page]="retards()" [loading]="retardsLoading()" (pageChange)="onRetardsPageChange($event)" />
+</section>
+
+<section class="feature-card dashboard-section">
+  <h2 class="dashboard-section__title">{{ t('dashboard.volume.title') }}</h2>
+  <app-volume-chart [items]="volume()" [loading]="volumeLoading()" />
+</section>
+
+

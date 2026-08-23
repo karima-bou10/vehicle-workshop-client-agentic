@@ -1,0 +1,9 @@
+@if (loading()) {
+  <div class="chart-loading">
+    <app-loading-spinner />
+  </div>
+} @else {
+  <div class="chart-canvas-wrapper" role="img" [attr.aria-label]="t('dashboard.statuts.title')">
+    <canvas baseChart [type]="chartType" [data]="chartData()" [options]="chartOptions()"></canvas>
+  </div>
+}
