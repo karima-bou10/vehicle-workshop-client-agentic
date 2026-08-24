@@ -33,3 +33,15 @@ export interface VolumeJournalierItem {
   recues: number;
   terminees: number;
 }
+
+export interface MecanicienSynthese {
+  id: number;
+  nom: string;
+  specialite: Specialite;
+  disponible: boolean;
+  nombreInterventionsEnCours: number;
+  nombreInterventionsEnReparation: number;
+  nombreInterventionsTerminees: number;
+  nombreInterventionsEnRetard: number;
+  delaiMoyenTraitementHeures: number | null;
+}

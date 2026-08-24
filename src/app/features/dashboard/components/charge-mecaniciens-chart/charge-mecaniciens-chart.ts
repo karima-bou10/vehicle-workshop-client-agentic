@@ -2,6 +2,7 @@ import { Component, computed, effect, inject, input, viewChild } from '@angular/
 import { BaseChartDirective } from 'ng2-charts';
 import type { ChartConfiguration, ChartData } from 'chart.js';
 import { LanguageService } from '../../../../core/services/language-service';
+import { RouterLink } from '@angular/router';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
 import { LoadingSpinner } from '../../../../shared/ui/loading-spinner/loading-spinner';
 import { ChartThemeService } from '../../services/chart-theme-service';
@@ -10,7 +11,7 @@ import { MecanicienChargeItem } from '../../models/dashboard-view.model';
 @Component({
   selector: 'app-charge-mecaniciens-chart',
   standalone: true,
-  imports: [BaseChartDirective, LoadingSpinner, EmptyState],
+  imports: [BaseChartDirective, LoadingSpinner, EmptyState, RouterLink],
   templateUrl: './charge-mecaniciens-chart.html',
   styleUrls: ['./charge-mecaniciens-chart.scss']
 })
