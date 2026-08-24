@@ -39,7 +39,7 @@
         </div>
       }
 
-      @if (isEdit && canEditVehicule() && sourceIntervention(); as iv) {
+      @if (isEdit && sourceIntervention(); as iv) {
         <div class="field field--full">
           <label class="field__label">Véhicule</label>
           <div class="field__input field__input--readonly">
@@ -92,7 +92,7 @@
           placeholder="Décrivez la demande du client"
         ></textarea>
         @if (isInvalid('descriptionClient')) {
-          <span class="field__error" role="alert">La description client est obligatoire (min. 3 caractères).</span>
+          <span class="field__error" role="alert">La description client est obligatoire (min. 25 caractères).</span>
         }
       </div>
       }
@@ -109,6 +109,56 @@
         />
         @if (isInvalid('dateDepot')) {
           <span class="field__error" role="alert">Date obligatoire et non future.</span>
+        }
+      </div>
+      }
+
+      @if( isEdit && canEditDateRestitutionPrevue()) {
+      <div class="field">
+        <label class="field__label" for="dateRestitutionPrevue">Date de restitution prévue</label>
+        <input
+          id="dateRestitutionPrevue"
+          type="date"
+          formControlName="dateRestitutionPrevue"
+          class="field__input"
+        />
+        @if (isInvalid('dateRestitutionPrevue')) {
+          <span class="field__error" role="alert">La date de restitution ne peut pas être dans le passé.</span>
+        }
+      </div>
+      }
+
+      @if( isEdit && canEditDevis()) {
+      <div class="field">
+        <label class="field__label" for="coutEstime">Coût estimé</label>
+        <input
+          id="coutEstime"
+          type="number"
+          min="0"
+          step="0.01"
+          formControlName="coutEstime"
+          class="field__input"
+          placeholder="Montant en euros"
+          (keypress)="allowOnlyNumber($event)"
+        />
+        @if (isInvalid('coutEstime')) {
+          <span class="field__error" role="alert">Le coût estimé ne peut pas être négatif.</span>
+        }
+      </div>
+      }
+
+      @if( isEdit && canEditDiagnostic()) {
+      <div class="field field--full" [class.field--erreur]="isInvalid ('diagnostic')">
+        <label class="field__label" for="diagnostic">Diagnostic</label>
+        <textarea
+          id="diagnostic"
+          formControlName="diagnostic"
+          class="field__input field__textarea"
+          rows="3"
+          placeholder="Décrivez le diagnostic du mécanicien"
+        ></textarea>
+        @if (isInvalid('diagnostic')) {
+          <span class="field__error" role="alert">Le diagnostic doit contenir au moins 25 caractères.</span>
         }
       </div>
       }

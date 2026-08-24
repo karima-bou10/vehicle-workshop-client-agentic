@@ -22,6 +22,7 @@ import {
 import { InterventionsService } from '../../services/interventions.service';
 import { MecaniciensService } from '../../../mecaniciens/services/mecaniciens.service';
 import { MecanicienListItem } from '../../../mecaniciens/models/mecanicien.model';
+import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 
 type VueInterventions = 'liste' | 'board';
 
@@ -34,7 +35,7 @@ interface BoardColumn {
 @Component({
   selector: 'app-interventions-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, PaginatedTable, StatusTag, LoadingSpinner, EmptyState, ConfirmationDialog],
+  imports: [CommonModule, FormsModule, RouterLink, PaginatedTable, StatusTag, LoadingSpinner, EmptyState, ConfirmationDialog, HasRoleDirective],
   templateUrl: './list.html',
   styleUrls: ['./list.scss']
 })

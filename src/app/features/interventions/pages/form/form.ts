@@ -60,9 +60,13 @@ export class InterventionsFormPage implements OnInit {
   readonly form = this.fb.group({
     vehiculeId: [null as number | null, [Validators.required, Validators.min(1)]],
     type: ['' as TypeIntervention | '', [Validators.required]],
-    descriptionClient: ['', [Validators.required, Validators.minLength(3)]],
+    descriptionClient: ['', [Validators.required, Validators.minLength(25)]],
     priorite: ['' as PrioriteIntervention | '', [Validators.required]],
     dateDepot: ['', [Validators.required, this.notInFutureDateValidator]],
+		coutEstime: [null as number | null, [Validators.required, Validators.min(0.01)]],
+		dateRestitutionPrevue: ['', [Validators.required, this.notInPastDateValidator]],
+    diagnostic: ['', [Validators.required, Validators.minLength(25)]],
+    
   });
 
   readonly statusLabel = computed(() => {
@@ -81,6 +85,30 @@ export class InterventionsFormPage implements OnInit {
     return status !== 'TERMINEE' && status !== 'RESTITUEE' && status !== 'ANNULEE';
   });
 
+  readonly canEditDevis = computed(() => {
+    if (!this.isEdit) {
+      return true;
+    }
+    const status = this.currentStatus();
+    return status === 'DEVIS_A_VALIDER';
+  });
+
+  readonly canEditDateRestitutionPrevue = computed(() => {
+    if (!this.isEdit) {
+      return true;
+    } 
+    const status = this.currentStatus();
+    return status === 'DEVIS_A_VALIDER';
+  });
+  
+  readonly canEditDiagnostic = computed(() => {
+    if (!this.isEdit) {
+      return true;
+    }
+    const status = this.currentStatus();
+    return status === 'DIAGNOSTIC_EN_COURS' || status === 'DEVIS_A_VALIDER';
+  });
+
   readonly canEditVehicule = computed(() => this.isEdit && this.currentStatus() === 'RECUE');
   readonly canEditType = computed(() => !this.isEdit || this.currentStatus() === 'RECUE');
   readonly canEditDateDepot = computed(() => !this.isEdit || this.currentStatus() === 'RECUE');
@@ -89,7 +117,7 @@ export class InterventionsFormPage implements OnInit {
       return true;
     }
     const status = this.currentStatus();
-    return status === 'RECUE' || status === 'DIAGNOSTIC_EN_COURS' || status === 'DEVIS_A_VALIDER';
+    return status === 'DIAGNOSTIC_EN_COURS' || status === 'DEVIS_A_VALIDER';
   });
   readonly canEditPriorite = computed(() => {
     if (!this.isEdit) {
@@ -113,14 +141,17 @@ export class InterventionsFormPage implements OnInit {
       return;
     }
 
+    // Create mode: these fields are edit-only — disable to skip their validators
+    this.form.controls.diagnostic.disable();
+    this.form.controls.coutEstime.disable();
+    this.form.controls.dateRestitutionPrevue.disable();
+
     this.loadVehicules();
   }
 
   private loadVehicules(): void {
     this.vehiculesService.list(0, 200).subscribe({
       next: (page) => {
-        console.log('Vehicules page', page.content);
-        console.log('Vehicules actifs', page.content.filter((v) => v.actif));
         this.vehicules.set(page.content.filter((v) => v.actif));
       },
       error: () => this.vehicules.set([]),
@@ -138,6 +169,9 @@ export class InterventionsFormPage implements OnInit {
           descriptionClient: iv.descriptionClient,
           priorite: iv.priorite,
           dateDepot: iv.dateDepot ? this.toDateInput(iv.dateDepot) : this.todayDateValue(),
+          diagnostic: iv.diagnostic ?? '',
+          coutEstime: iv.coutEstime,
+          dateRestitutionPrevue: iv.dateRestitutionPrevue ? this.toDateInput(iv.dateRestitutionPrevue) : '',
         });
         this.form.controls.vehiculeId.setValue(null);
         this.applyFieldRules();
@@ -156,8 +190,10 @@ export class InterventionsFormPage implements OnInit {
   }
 
   submit(): void {
+
     this.form.markAllAsTouched();
     if (this.form.invalid || this.submitting()) return;
+
 
     const raw = this.form.getRawValue();
     this.submitting.set(true);
@@ -174,7 +210,13 @@ export class InterventionsFormPage implements OnInit {
         descriptionClient: raw.descriptionClient!,
         priorite: raw.priorite as PrioriteIntervention,
         dateDepot: raw.dateDepot ? this.toApiDate(raw.dateDepot) : new Date().toISOString(),
+        diagnostic: this.canEditDiagnostic() ? (raw.diagnostic || null) : this.sourceIntervention()!.diagnostic,
+        coutEstime: this.canEditDevis() ? raw.coutEstime : this.sourceIntervention()!.coutEstime,
+        dateRestitutionPrevue: this.canEditDateRestitutionPrevue()
+          ? (raw.dateRestitutionPrevue ? this.toApiDate(raw.dateRestitutionPrevue) : null)
+          : this.sourceIntervention()!.dateRestitutionPrevue,
       };
+
       this.service.update(this.editNumero()!, req).subscribe({
         next: (iv) => {
           this.notification.success(`Intervention ${iv.numero} mise à jour.`);
@@ -190,6 +232,7 @@ export class InterventionsFormPage implements OnInit {
         priorite: raw.priorite as PrioriteIntervention,
         dateDepot: raw.dateDepot ? this.toApiDate(raw.dateDepot) : null,
       };
+
       this.service.create(req).subscribe({
         next: (iv) => {
           this.notification.success(`Intervention ${iv.numero} créée.`);
@@ -215,6 +258,9 @@ export class InterventionsFormPage implements OnInit {
     this.toggleControl(this.form.controls.dateDepot, this.canEditDateDepot());
     this.toggleControl(this.form.controls.descriptionClient, this.canEditDescription());
     this.toggleControl(this.form.controls.priorite, this.canEditPriorite());
+    this.toggleControl(this.form.controls.diagnostic, this.canEditDiagnostic());
+    this.toggleControl(this.form.controls.coutEstime, this.canEditDevis());
+    this.toggleControl(this.form.controls.dateRestitutionPrevue, this.canEditDateRestitutionPrevue());
   }
 
   private toggleControl(control: AbstractControl, enabled: boolean): void {
@@ -253,5 +299,39 @@ export class InterventionsFormPage implements OnInit {
 
     return selected.getTime() > today.getTime() ? { futureDate: true } : null;
   }
+
+      allowOnlyNumber(event: KeyboardEvent): void {
+
+        if (!this.isValidNumberKey(event.key)) {
+
+            event.preventDefault();
+
+        }
+  }
+  
+      isValidNumberKey(key: string): boolean {
+
+     return /^[0-9.]$/.test(key);
+
+  }
+  
+    private notInPastDateValidator(control: AbstractControl): ValidationErrors | null {
+    const value = control.value as string | null;
+    if (!value) {
+      return null;
+    }
+
+    const selected = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(selected.getTime())) {
+      return { invalidDate: true };
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    return selected.getTime() < today.getTime() ? { pastDate: true } : null;
+  }
+        
+
 }
 

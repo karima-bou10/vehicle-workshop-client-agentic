@@ -52,7 +52,7 @@
 
         @if (iv.statut === 'DEVIS_A_VALIDER') {
         <a [routerLink]="['/interventions', 'affectation']" [queryParams]="{ numero: iv.numero }"
-            class="action-button action-button--primary">
+            class="action-button action-button--primary" *appHasRole="'ROLE_MANAGER'">
             Affecter mécanicien
         </a>
         }
@@ -66,7 +66,7 @@
 
         <ng-container *appHasRole="'ROLE_MANAGER'">
             @if (iv.statut === 'TERMINEE') {
-            <button type="button" class="action-button action-button--success"
+            <button type="button" class="action-button action-button--success" *appHasRole="'ROLE_MANAGER'"
                 (click)="openTransitionDialog('RESTITUEE')" [disabled]="actionBusy()">
                 Restituer
             </button>
@@ -74,14 +74,14 @@
 
             @if (canAnnuler(iv.statut)) {
             <button type="button" class="action-button action-button--danger" (click)="openTransitionDialog('ANNULEE')"
-                [disabled]="actionBusy()">
+                *appHasRole="'ROLE_MANAGER'" [disabled]="actionBusy()">
                 Annuler l'intervention
             </button>
             }
         </ng-container>
 
         @if (canArchive(iv.statut)) {
-        <button type="button" class="action-button action-button--warning" (click)="openArchiveDialog()"
+        <button type="button" *appHasRole="'ROLE_MANAGER'" class="action-button action-button--warning" (click)="openArchiveDialog()"
             [disabled]="actionBusy()">
             Archiver
         </button>

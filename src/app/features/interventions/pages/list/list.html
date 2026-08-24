@@ -135,7 +135,7 @@
                     </a>
                     }
                     @if (canArchive(item.statut)) {
-                    <button type="button" class="btn-action btn-action--archive" title="Archiver" (click)="confirmArchive(item)">
+                    <button *appHasRole="'ROLE_MANAGER'" type="button" class="btn-action btn-action--archive" title="Archiver" (click)="confirmArchive(item)">
                       Archiver
                     </button>
                     }

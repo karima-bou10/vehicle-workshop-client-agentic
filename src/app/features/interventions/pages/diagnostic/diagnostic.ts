@@ -29,7 +29,7 @@ export class InterventionsDiagnosticPage implements OnInit {
 	readonly intervention = signal<Intervention | null>(null);
 
 	readonly form = this.fb.group({
-		diagnostic: ['', [Validators.required, Validators.minLength(3)]],
+		diagnostic: ['', [Validators.required, Validators.minLength(25)]],
 	});
 
 	ngOnInit(): void {
