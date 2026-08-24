@@ -238,7 +238,7 @@ export class MecaniciensListPage implements OnInit {
     this.deactivating.set(true);
     this.service.desactiver(target.id).subscribe({
       next: () => {
-        this.notification.success(`${target.nom} a été désactivé.`);
+        this.notification.success(`${target.nom} a été archivé.`);
         this.deactivateTarget.set(null);
         this.deactivating.set(false);
         this.reloadRespectingContext();
@@ -262,7 +262,7 @@ export class MecaniciensListPage implements OnInit {
   }
 
   deactivateDialogMessage(item: Mecanicien): string {
-    return `Désactiver ${item.nom} ? Il n'apparaîtra plus dans la liste active mais ses interventions passées restent inchangées.`;
+    return `Archiver ${item.nom} ? Il n'apparaîtra plus dans la liste mais ses interventions passées restent inchangées.`;
   }
 
   specialiteLibelle(specialite: string): string {

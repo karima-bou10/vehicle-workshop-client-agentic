@@ -14,7 +14,7 @@
           <p class="detail-page__subtitle">
             {{ specialiteLibelle(m.specialite) }}
             @if (!m.actif) {
-              <span class="badge-archive">Désactivé</span>
+              <span class="badge-archive">Archivé</span>
             }
           </p>
         </div>
@@ -41,7 +41,7 @@
                 class="action-button action-button--danger"
                 [disabled]="actionBusy()"
                 (click)="openDeactivateDialog()">
-                Désactiver
+                Archiver
               </button>
             </ng-container>
           }
@@ -71,7 +71,7 @@
           </div>
           <div class="detail-dl__row">
             <dt>Statut</dt>
-            <dd>{{ m.actif ? 'Actif' : 'Désactivé' }}</dd>
+            <dd>{{ m.actif ? 'Actif' : 'Archivé' }}</dd>
           </div>
         </dl>
       </section>
@@ -136,10 +136,10 @@
     @if (deactivateDialogOpen()) {
       <app-confirmation-dialog
         [open]="deactivateDialogOpen()"
-        title="Désactiver le mécanicien ?"
+        title="Archiver le mécanicien ?"
         [message]="deactivateMessage(m)"
         variant="alert"
-        confirmLabel="Désactiver"
+        confirmLabel="Archiver"
         cancelLabel="Retour"
         (confirm)="doDeactivate()"
         (cancel)="cancelDeactivate()" />
@@ -148,7 +148,7 @@
     @if (blocked()) {
       <app-confirmation-dialog
         [open]="blocked()"
-        title="Désactivation impossible"
+        title="Archivage impossible"
         [message]="blockedMessage(m)"
         variant="info"
         confirmLabel="Fermer"
