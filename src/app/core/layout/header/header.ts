@@ -5,7 +5,7 @@ import { ThemeToggle } from '../../../shared/ui/theme-toggle/theme-toggle';
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [ThemeToggle, LanguageSwitcher],
+  imports: [ThemeToggle],
   templateUrl: './header.html',
   styleUrls: ['./header.scss']
 })

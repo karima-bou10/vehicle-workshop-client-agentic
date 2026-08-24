@@ -10,15 +10,32 @@ import { PaginatedTable } from '../../../../shared/ui/paginated-table/paginated-
 import { StatusTag } from '../../../../shared/ui/status-tag/status-tag';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
 import { NotificationService } from '../../../../core/services/notification.service';
-import { Intervention, InterventionListFilters, STATUT_LIBELLES, StatutIntervention, TYPE_LIBELLES } from '../../models/intervention-view.model';
+import {
+  Intervention,
+  InterventionListFilters,
+  PRIORITE_LIBELLES,
+  PrioriteIntervention,
+  STATUT_LIBELLES,
+  StatutIntervention,
+  TYPE_LIBELLES,
+} from '../../models/intervention-view.model';
 import { InterventionsService } from '../../services/interventions.service';
 import { MecaniciensService } from '../../../mecaniciens/services/mecaniciens.service';
 import { MecanicienListItem } from '../../../mecaniciens/models/mecanicien.model';
+import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
+
+type VueInterventions = 'liste' | 'board';
+
+interface BoardColumn {
+  statut: StatutIntervention;
+  label: string;
+  interventions: Intervention[];
+}
 
 @Component({
   selector: 'app-interventions-list-page',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, PaginatedTable, StatusTag, LoadingSpinner, EmptyState, ConfirmationDialog],
+  imports: [CommonModule, FormsModule, RouterLink, PaginatedTable, StatusTag, LoadingSpinner, EmptyState, ConfirmationDialog, HasRoleDirective],
   templateUrl: './list.html',
   styleUrls: ['./list.scss']
 })
@@ -35,6 +52,7 @@ export class InterventionsListPage implements OnInit {
   readonly currentPage = signal(0);
   readonly pageSize = signal(20);
   readonly currentSort = signal('dateDepot,DESC');
+  readonly vueActive = signal<VueInterventions>('liste');
   readonly mecaniciens = signal<MecanicienListItem[]>([]);
   readonly filters = signal<InterventionListFilters>({
     statut: null,
@@ -55,6 +73,23 @@ export class InterventionsListPage implements OnInit {
   readonly hasActiveFilters = computed(() => {
     const filters = this.filters();
     return Boolean(filters.statut || filters.mecanicienId || filters.immatriculation || filters.q || filters.enRetard);
+  });
+  readonly boardColumns = computed<BoardColumn[]>(() => {
+    const interventions = this.page()?.content ?? [];
+    const orderedStatuts: StatutIntervention[] = [
+      'RECUE',
+      'DIAGNOSTIC_EN_COURS',
+      'DEVIS_A_VALIDER',
+      'EN_REPARATION',
+      'TERMINEE',
+      'RESTITUEE',
+    ];
+
+    return orderedStatuts.map((statut) => ({
+      statut,
+      label: STATUT_LIBELLES[statut],
+      interventions: interventions.filter((item) => item.statut === statut),
+    }));
   });
 
   ngOnInit(): void {
@@ -115,6 +150,10 @@ export class InterventionsListPage implements OnInit {
 
   updateFilter<K extends keyof InterventionListFilters>(key: K, value: InterventionListFilters[K]): void {
     this.filters.update((current) => ({ ...current, [key]: value }));
+  }
+
+  setVueActive(vue: VueInterventions): void {
+    this.vueActive.set(vue);
   }
 
   exportCsv(): void {
@@ -178,6 +217,14 @@ export class InterventionsListPage implements OnInit {
 
   typeLibelle(type: string): string {
     return TYPE_LIBELLES[type as keyof typeof TYPE_LIBELLES] ?? type;
+  }
+
+  prioriteLibelle(priorite: PrioriteIntervention): string {
+    return PRIORITE_LIBELLES[priorite] ?? priorite;
+  }
+
+  prioriteClass(priorite: PrioriteIntervention): string {
+    return `priority-badge--${priorite.toLowerCase()}`;
   }
 
   isEnRetard(item: Intervention): boolean {

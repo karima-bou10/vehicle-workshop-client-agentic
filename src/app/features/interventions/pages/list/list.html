@@ -73,55 +73,117 @@
     <div class="list-page__center">
       <app-loading-spinner />
     </div>
-  } @else if (!page() || page()!.content.length === 0) {
-    <app-empty-state message="Aucune intervention active pour le moment." />
   } @else {
-    <div class="list-page__table-wrapper">
-      <app-paginated-table [headers]="tableHeaders">
-        @for (item of page()!.content; track item.numero) {
-          <div class="table-row">
-            <span class="table-cell">
-              <a [routerLink]="['/interventions', item.numero]" class="link-numero">
-                {{ item.numero }}
-              </a>
-            </span>
-            <span class="table-cell">
-              <span class="vehicule-label">
-                {{ item.vehicule.marque }} {{ item.vehicule.modele }}
-                <span class="vehicule-immat">{{ item.vehicule.immatriculationFictive }}</span>
-              </span>
-            </span>
-            <span class="table-cell">{{ typeLibelle(item.type) }}</span>
-            <span class="table-cell">
-              <app-status-tag [statut]="item.statut" />
-            </span>
-            <span class="table-cell table-cell--retard">
-              @if (isEnRetard(item)) {
-                <span class="retard-badge">En retard</span>
-              } @else {
-                <span class="retard-badge retard-badge--neutral">À l'heure</span>
+    @if (!page()) {
+      <app-empty-state message="Aucune intervention active pour le moment." />
+    } @else {
+      <div class="view-toggle" role="group" aria-label="Choisir la vue d'affichage">
+        <button
+          type="button"
+          class="view-toggle__btn"
+          [class.view-toggle__btn--active]="vueActive() === 'liste'"
+          (click)="setVueActive('liste')">
+          Liste
+        </button>
+        <button
+          type="button"
+          class="view-toggle__btn"
+          [class.view-toggle__btn--active]="vueActive() === 'board'"
+          (click)="setVueActive('board')">
+          Board
+        </button>
+      </div>
+
+      @if (vueActive() === 'liste') {
+        @if (page()!.content.length === 0) {
+          <app-empty-state message="Aucune intervention active pour le moment." />
+        } @else {
+          <div class="list-page__table-wrapper">
+            <app-paginated-table [headers]="tableHeaders">
+              @for (item of page()!.content; track item.numero) {
+                <div class="table-row">
+                  <span class="table-cell">
+                    <a [routerLink]="['/interventions', item.numero]" class="link-numero">
+                      {{ item.numero }}
+                    </a>
+                  </span>
+                  <span class="table-cell">
+                    <span class="vehicule-label">
+                      {{ item.vehicule.marque }} {{ item.vehicule.modele }}
+                      <span class="vehicule-immat">{{ item.vehicule.immatriculationFictive }}</span>
+                    </span>
+                  </span>
+                  <span class="table-cell">{{ typeLibelle(item.type) }}</span>
+                  <span class="table-cell">
+                    <app-status-tag [statut]="item.statut" />
+                  </span>
+                  <span class="table-cell table-cell--retard">
+                    @if (isEnRetard(item)) {
+                      <span class="retard-badge">En retard</span>
+                    } @else {
+                      <span class="retard-badge retard-badge--neutral">À l'heure</span>
+                    }
+                  </span>
+                  <span class="table-cell" style="font-size: 0.82rem;">{{ formatDate(item.dateDepot) }}</span>
+                  <span class="table-cell table-cell--actions">
+                    <a [routerLink]="['/interventions', item.numero]" class="btn-action btn-action--view" title="Voir le détail">
+                      Détail
+                    </a>
+                    @if (canModify(item.statut)) {
+                    <a [routerLink]="['/interventions', item.numero, 'modifier']" class="btn-action btn-action--edit" title="Modifier">
+                      Modifier
+                    </a>
+                    }
+                    @if (canArchive(item.statut)) {
+                    <button *appHasRole="'ROLE_MANAGER'" type="button" class="btn-action btn-action--archive" title="Archiver" (click)="confirmArchive(item)">
+                      Archiver
+                    </button>
+                    }
+                  </span>
+                </div>
               }
-            </span>
-            <span class="table-cell" style="font-size: 0.82rem;">{{ formatDate(item.dateDepot) }}</span>
-            <span class="table-cell table-cell--actions">
-              <a [routerLink]="['/interventions', item.numero]" class="btn-action btn-action--view" title="Voir le détail">
-                Détail
-              </a>
-              @if (canModify(item.statut)) {
-              <a [routerLink]="['/interventions', item.numero, 'modifier']" class="btn-action btn-action--edit" title="Modifier">
-                Modifier
-              </a>
-              }
-              @if (canArchive(item.statut)) {
-              <button type="button" class="btn-action btn-action--archive" title="Archiver" (click)="confirmArchive(item)">
-                Archiver
-              </button>
-              }
-            </span>
+            </app-paginated-table>
           </div>
         }
-      </app-paginated-table>
-    </div>
+      } @else {
+        <div class="board" role="region" aria-label="Vue board des interventions">
+          @for (column of boardColumns(); track column.statut) {
+            <section class="board-column" [attr.data-statut]="column.statut.toLowerCase()">
+              <header class="board-column__header">
+                <app-status-tag [statut]="column.statut" [label]="column.label" />
+                <span class="board-column__count">{{ column.interventions.length }}</span>
+              </header>
+
+              <div class="board-column__content">
+                @if (column.interventions.length === 0) {
+                  <app-empty-state message="Aucune intervention" />
+                } @else {
+                  @for (item of column.interventions; track item.numero) {
+                    <a [routerLink]="['/interventions', item.numero]" class="board-card">
+                      <div class="board-card__numero">{{ item.numero }}</div>
+                      <div class="board-card__vehicule">
+                        {{ item.vehicule.marque }} {{ item.vehicule.modele }}
+                        <span>{{ item.vehicule.immatriculationFictive }}</span>
+                      </div>
+                      <div class="board-card__meta">
+                        <span class="board-chip">{{ typeLibelle(item.type) }}</span>
+                        <span class="priority-badge" [ngClass]="prioriteClass(item.priorite)">
+                          {{ prioriteLibelle(item.priorite) }}
+                        </span>
+                        @if (isEnRetard(item)) {
+                          <span class="retard-badge">En retard</span>
+                        }
+                      </div>
+                      <div class="board-card__date">Dépôt : {{ formatDate(item.dateDepot) }}</div>
+                    </a>
+                  }
+                }
+              </div>
+            </section>
+          }
+        </div>
+      }
+    }
 
     @if (totalPages > 1) {
       <nav class="pagination" aria-label="Pagination">
