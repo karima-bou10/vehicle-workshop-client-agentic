@@ -1,8 +1,18 @@
 <div class="user-menu" [class.user-menu--reduit]="reduit()">
   @if (ouvert()) {
     <div class="user-menu__panneau" (click)="$event.stopPropagation()">
-      <button type="button" class="user-menu__action user-menu__action--danger" (click)="deconnexion()">
-        {{ t('sidebar.logout') }}
+      <button
+        type="button"
+        class="user-menu__action user-menu__action--danger"
+        [attr.aria-label]="t('sidebar.logout')"
+        [title]="reduit() ? t('sidebar.logout') : ''"
+        (click)="deconnexion()">
+        <svg class="user-menu__action-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path d="M10 5H6.8C6.1 5 5.5 5.6 5.5 6.3v11.4c0 .7.6 1.3 1.3 1.3H10" />
+          <path d="M14.2 8.2 18 12l-3.8 3.8" />
+          <path d="M10.2 12H18" />
+        </svg>
+        <span class="user-menu__logout-label">{{ t('sidebar.logout') }}</span>
       </button>
     </div>
   }
@@ -13,7 +23,12 @@
     [attr.aria-expanded]="ouvert()"
     [title]="reduit() ? nom() : ''"
     (click)="basculer($event)">
-    <span class="user-menu__avatar">{{ initiales() }}</span>
+    <span class="user-menu__avatar" aria-hidden="true">
+      <svg class="user-menu__avatar-icon" viewBox="0 0 24 24" focusable="false">
+        <circle cx="12" cy="8" r="3" />
+        <path d="M6.7 18c.9-2.8 2.9-4.4 5.3-4.4s4.4 1.6 5.3 4.4" />
+      </svg>
+    </span>
 
     <span class="user-menu__identite">
       <span class="user-menu__nom">{{ nom() }}</span>

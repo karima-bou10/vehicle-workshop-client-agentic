@@ -149,6 +149,79 @@
   &--success { background: color-mix(in srgb, var(--color-done) 18%, var(--surface-card)); color: var(--color-done); border-color: color-mix(in srgb, var(--color-done) 32%, var(--border-soft)); }
   &--warning { background: color-mix(in srgb, var(--color-wait) 18%, var(--surface-card)); color: var(--color-wait); border-color: color-mix(in srgb, var(--color-wait) 32%, var(--border-soft)); }
   &--danger { background: color-mix(in srgb, var(--color-danger) 18%, var(--surface-card)); color: var(--color-danger); border-color: color-mix(in srgb, var(--color-danger) 32%, var(--border-soft)); }
+  &--ai { background: linear-gradient(135deg, color-mix(in srgb, var(--color-action) 84%, #0f223c), color-mix(in srgb, var(--surface-card) 30%, var(--color-action))); color: var(--text-on-dark); box-shadow: 0 10px 24px color-mix(in srgb, var(--color-action) 25%, transparent); }
+}
+
+.detail-card--ai-suggestion {
+  border-color: color-mix(in srgb, var(--color-action) 35%, var(--border-soft));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--surface-card) 96%, transparent), color-mix(in srgb, var(--color-action) 7%, var(--surface-card)));
+}
+
+.ai-suggestion-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  color: var(--color-action);
+  background: color-mix(in srgb, var(--color-action) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-action) 35%, var(--border-soft));
+}
+
+.ai-suggestion-note {
+  margin: 0.15rem 0 0;
+  color: var(--text-muted);
+  font-size: 0.86rem;
+}
+
+.ai-suggestion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.ai-suggestion-block {
+  display: grid;
+  gap: 0.55rem;
+
+  h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+
+  ol {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: grid;
+    gap: 0.35rem;
+  }
+}
+
+.ai-suggestion-input {
+  width: 100%;
+  border: 1px solid var(--border-soft);
+  border-radius: 0.8rem;
+  background: color-mix(in srgb, var(--surface-card) 98%, transparent);
+  color: var(--text-primary);
+  padding: 0.85rem;
+  resize: vertical;
+  min-height: 11rem;
+
+  &[readonly] {
+    opacity: 0.88;
+    cursor: not-allowed;
+  }
+}
+
+.ai-suggestion-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
 }
 
 .table-row {
