@@ -1,0 +1,17 @@
+@if (loading()) {
+  <div class="chart-loading">
+    <app-loading-spinner />
+  </div>
+} @else if (!items() || items()!.length === 0) {
+  <app-empty-state message="Aucun mécanicien à afficher." />
+} @else {
+  <div class="chart-wrapper">
+    <div class="chart-header">
+      <div class="chart-title">{{ t('dashboard.charge.title') }}</div>
+      <a routerLink="/dashboard/synthese-mecaniciens" class="btn-primary chart-action">{{ t('dashboard.synthese.button') }}</a>
+    </div>
+    <div class="chart-canvas-wrapper" role="img" [attr.aria-label]="t('dashboard.charge.title')">
+      <canvas baseChart [type]="chartType" [data]="chartData()" [options]="chartOptions()"></canvas>
+    </div>
+  </div>
+}
