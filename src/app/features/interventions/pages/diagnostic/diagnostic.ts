@@ -34,6 +34,7 @@ export class InterventionsDiagnosticPage implements OnInit {
 
 	ngOnInit(): void {
 		const numero = this.route.snapshot.queryParamMap.get('numero') ?? '';
+		const draftDiagnostic = this.route.snapshot.queryParamMap.get('draftDiagnostic')?.trim() ?? '';
 		if (!numero) {
 			this.router.navigateByUrl('/interventions');
 			return;
@@ -48,7 +49,11 @@ export class InterventionsDiagnosticPage implements OnInit {
 					return;
 				}
 				this.intervention.set(iv);
-				this.form.patchValue({ diagnostic: iv.diagnostic ?? '' });
+				const initialDiagnostic = draftDiagnostic || iv.diagnostic || '';
+				this.form.patchValue({ diagnostic: initialDiagnostic });
+				if (draftDiagnostic) {
+					this.notification.info('Suggestion IA pre-remplie. Verifiez puis confirmez manuellement.');
+				}
 				this.loading.set(false);
 			},
 			error: () => {

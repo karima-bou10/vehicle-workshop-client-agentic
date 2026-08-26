@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Page } from '../../../core/models/page.model';
 import { environment } from '../../../environments/environment.development';
+import { AiDiagnosticProposition } from '../models/ai-diagnostic-proposition.model';
 import {
   HistoriqueInterventionResponse,
   Intervention,
@@ -111,5 +112,9 @@ export class InterventionsService {
   ): Observable<Page<Intervention>> {
     const params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
     return this.http.get<Page<Intervention>>(`${this.baseUrl}/mecanicien/${mecanicienId}`, { params });
+  }
+
+  assistantDiagnostic(idOrNumero: string): Observable<AiDiagnosticProposition> {
+    return this.http.post<AiDiagnosticProposition>(`${this.baseUrl}/${idOrNumero}/ai-diagnostic`, {});
   }
 }

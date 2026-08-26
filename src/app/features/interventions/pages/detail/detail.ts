@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
 import { EmptyState } from '../../../../shared/ui/empty-state/empty-state';
@@ -19,6 +20,7 @@ import {
   TYPE_LIBELLES,
   TransitionRequest,
 } from '../../models/intervention-view.model';
+import { AiDiagnosticProposition } from '../../models/ai-diagnostic-proposition.model';
 import { InterventionsService } from '../../services/interventions.service';
 import { SPECIALITE_LIBELLES } from '../../../mecaniciens/models/mecanicien.model';
 
@@ -39,6 +41,7 @@ type DialogState = {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterLink,
     LoadingSpinner,
     StatusTag,
@@ -65,6 +68,11 @@ export class InterventionsDetailPage implements OnInit {
   readonly relatedLoading = signal(false);
   readonly actionBusy = signal(false);
   readonly dialogState = signal<DialogState | null>(null);
+  readonly aiLoading = signal(false);
+  readonly aiPanelOpen = signal(false);
+  readonly aiProposal = signal<AiDiagnosticProposition | null>(null);
+  readonly aiDiagnosticDraft = signal('');
+  readonly aiEditing = signal(false);
 
   readonly specialiteLibelles = SPECIALITE_LIBELLES;
 
@@ -115,6 +123,11 @@ export class InterventionsDetailPage implements OnInit {
   readonly relatedPageRange = computed(() => {
     const totalPages = this.related()?.totalPages ?? 0;
     return Array.from({ length: totalPages }, (_, index) => index);
+  });
+
+  readonly canUseAiAssistant = computed(() => {
+    const statut = this.intervention()?.statut;
+    return statut === 'RECUE' || statut === 'DIAGNOSTIC_EN_COURS';
   });
 /*
   ngOnInit(): void {
@@ -305,6 +318,76 @@ export class InterventionsDetailPage implements OnInit {
     return statut !== 'TERMINEE' && statut !== 'RESTITUEE' && statut !== 'ANNULEE';
   }
 
+  launchAiAssistant(): void {
+    const iv = this.intervention();
+    if (!iv || this.aiLoading()) return;
+
+    this.aiLoading.set(true);
+    this.service.assistantDiagnostic(iv.numero).subscribe({
+      next: (proposal) => {
+        this.aiLoading.set(false);
+        this.aiProposal.set(proposal);
+        this.aiDiagnosticDraft.set(this.buildDiagnosticDraft(proposal));
+        this.aiEditing.set(false);
+        this.aiPanelOpen.set(true);
+
+        if (this.isFallbackProposal(proposal)) {
+          this.notification.warning('Assistant indisponible, réessayez plus tard.');
+        }
+      },
+      error: () => {
+        this.aiLoading.set(false);
+        this.notification.error('Impossible de recuperer la proposition IA pour le moment.');
+      },
+    });
+  }
+
+  onAiDraftInput(value: string): void {
+    this.aiDiagnosticDraft.set(value);
+  }
+
+  enableAiEdit(): void {
+    this.aiEditing.set(true);
+    this.notification.info('Vous pouvez modifier la suggestion IA avant utilisation.');
+  }
+
+  acceptAiSuggestion(): void {
+    const iv = this.intervention();
+    if (!iv) return;
+
+    const draftDiagnostic = this.aiDiagnosticDraft().trim();
+    if (!draftDiagnostic) {
+      this.notification.warning('Le texte propose est vide. Modifiez la proposition avant de l\'utiliser.');
+      return;
+    }
+
+    this.aiPanelOpen.set(false);
+
+    if (iv.statut === 'RECUE') {
+      this.router.navigate(['/interventions/diagnostic'], {
+        queryParams: {
+          numero: iv.numero,
+          draftDiagnostic,
+        },
+      });
+      return;
+    }
+
+    this.router.navigate(['/interventions', iv.numero, 'modifier'], {
+      queryParams: {
+        draftDiagnostic,
+      },
+    });
+    this.notification.info('Suggestion IA pre-remplie. Enregistrez ensuite via le formulaire standard.');
+  }
+
+  ignoreAiSuggestion(): void {
+    this.aiPanelOpen.set(false);
+    this.aiProposal.set(null);
+    this.aiDiagnosticDraft.set('');
+    this.aiEditing.set(false);
+  }
+
   formatWorkflowDate(iso: string | null): string {
     if (!iso) return '—';
     return new Date(iso).toLocaleDateString('fr-FR', {
@@ -354,6 +437,28 @@ export class InterventionsDetailPage implements OnInit {
       default:
         return `Confirmer le passage de ${numero} au statut ${this.statutLibelle(targetStatus)} ?`;
     }
+  }
+
+  private isFallbackProposal(proposal: AiDiagnosticProposition): boolean {
+    const message = proposal.reformulation?.toLowerCase() ?? '';
+    return message.includes('indisponible') || message.includes('reessayez plus tard');
+  }
+
+  private buildDiagnosticDraft(proposal: AiDiagnosticProposition): string {
+    const hypotheses = proposal.hypotheses.map((item, index) => `${index + 1}. ${item}`).join('\n');
+    const pointsControle = proposal.pointsControle.map((item, index) => `${index + 1}. ${item}`).join('\n');
+
+    return [
+      `Reformulation: ${proposal.reformulation}`,
+      '',
+      'Hypotheses de diagnostic:',
+      hypotheses,
+      '',
+      'Points de controle:',
+      pointsControle,
+      '',
+      `Priorite suggeree: ${this.prioriteLibelle(proposal.prioriteSuggeree)}`,
+    ].join('\n');
   }
 }
 

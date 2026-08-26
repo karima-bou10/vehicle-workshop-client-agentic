@@ -56,6 +56,7 @@ export class InterventionsFormPage implements OnInit {
   readonly currentStatus = signal<StatutIntervention | null>(null);
   readonly sourceIntervention = signal<Intervention | null>(null);
   readonly vehicules = signal<VehiculeListItem[]>([]);
+  readonly draftDiagnostic = signal<string>('');
 
   readonly form = this.fb.group({
     vehiculeId: [null as number | null, [Validators.required, Validators.min(1)]],
@@ -133,6 +134,7 @@ export class InterventionsFormPage implements OnInit {
 
   ngOnInit(): void {
     this.form.patchValue({ dateDepot: this.todayDateValue() });
+    this.draftDiagnostic.set(this.route.snapshot.queryParamMap.get('draftDiagnostic')?.trim() ?? '');
 
     const numero = this.route.snapshot.paramMap.get('numero');
     if (numero) {
@@ -175,6 +177,12 @@ export class InterventionsFormPage implements OnInit {
         });
         this.form.controls.vehiculeId.setValue(null);
         this.applyFieldRules();
+
+        if (this.draftDiagnostic() && this.canEditDiagnostic()) {
+          this.form.patchValue({ diagnostic: this.draftDiagnostic() });
+          this.notification.info('Suggestion IA pre-remplie. Verifiez puis enregistrez manuellement.');
+        }
+
         this.loading.set(false);
       },
       error: () => {
