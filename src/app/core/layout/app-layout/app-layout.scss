@@ -5,8 +5,7 @@
 
 .shell {
   min-height: 100dvh;
-  display: grid;
-  grid-template-columns: auto 1fr;
+  display: block;
 }
 
 .shell__workspace {
@@ -14,6 +13,9 @@
   display: flex;
   flex-direction: column;
   background: var(--surface-bg);
+  margin-left: 280px;
+  min-height: 100dvh;
+  transition: margin-left 220ms ease;
 }
 
 .shell__content {
@@ -21,9 +23,14 @@
   padding: 0 1.5rem 1.5rem;
 }
 
+.shell:has(.sidebar--reduced) .shell__workspace {
+  margin-left: 72px;
+}
+
 @media (max-width: 980px) {
-  .shell {
-    grid-template-columns: 1fr;
+  .shell__workspace,
+  .shell:has(.sidebar--reduced) .shell__workspace {
+    margin-left: 0;
   }
 }
 
