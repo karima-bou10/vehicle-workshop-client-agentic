@@ -129,19 +129,20 @@ export class InterventionsDetailPage implements OnInit {
     const statut = this.intervention()?.statut;
     return statut === 'RECUE' || statut === 'DIAGNOSTIC_EN_COURS';
   });
-/*
   ngOnInit(): void {
-    const numero = this.route.snapshot.paramMap.get('numero') ?? '';
-    this.loadIntervention(numero);
-  }*/
-
-  ngOnInit(): void {
-   this.route.params.subscribe(params => {
-  this.loadIntervention(params['numero']);
-  });
-}
+    this.route.params.subscribe(params => {
+      const numero: string = params['numero'];
+      console.log('Route params:', numero);
+      if (!numero) return;
+      this.loadIntervention(numero);
+    });
+  }
 
   private loadIntervention(numero: string): void {
+    this.aiPanelOpen.set(false);
+    this.aiProposal.set(null);
+    this.aiDiagnosticDraft.set('');
+    this.aiEditing.set(false);
     this.loading.set(true);
     this.service.getByNumero(numero).subscribe({
       next: (data) => {
@@ -320,7 +321,8 @@ export class InterventionsDetailPage implements OnInit {
 
   launchAiAssistant(): void {
     const iv = this.intervention();
-    if (!iv || this.aiLoading()) return;
+    console.log('Launching AI assistant for intervention:', iv?.numero);
+    if (!iv || !iv.numero || this.aiLoading()) return;
 
     this.aiLoading.set(true);
     this.service.assistantDiagnostic(iv.numero).subscribe({

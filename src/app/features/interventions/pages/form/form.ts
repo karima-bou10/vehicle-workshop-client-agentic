@@ -228,7 +228,7 @@ export class InterventionsFormPage implements OnInit {
       this.service.update(this.editNumero()!, req).subscribe({
         next: (iv) => {
           this.notification.success(`Intervention ${iv.numero} mise à jour.`);
-          this.router.navigateByUrl(`/interventions/${iv.numero}`);
+          this.router.navigate(['/interventions', iv.numero]);
         },
         error: () => this.submitting.set(false),
       });
@@ -244,7 +244,7 @@ export class InterventionsFormPage implements OnInit {
       this.service.create(req).subscribe({
         next: (iv) => {
           this.notification.success(`Intervention ${iv.numero} créée.`);
-          this.router.navigateByUrl(`/interventions/${iv.numero}`);
+          this.router.navigate(['/interventions', iv.numero]);
         },
         error: () => this.submitting.set(false),
       });
