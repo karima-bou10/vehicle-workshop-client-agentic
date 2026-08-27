@@ -1,4 +1,94 @@
-<section class="feature-card">
-  <h1>{{ t('vehicules.title') }}</h1>
-  <p>{{ t('vehicules.subtitle') }}</p>
-</section>
+<div class="list-page">
+
+  <header class="list-page__header">
+    <div>
+      <h1 class="list-page__title">{{ t('vehicules.title') }}</h1>
+      <p class="list-page__subtitle">{{ t('vehicules.subtitle') }}</p>
+    </div>
+    <div class="list-page__header-actions">
+      <button type="button" class="btn-secondary" [disabled]="loading() || !hasVehicles()" (click)="exportCsv()">
+        Exporter CSV
+      </button>
+      <a routerLink="/vehicules/nouveau" class="btn-primary">+ Nouveau véhicule</a>
+    </div>
+  </header>
+
+  <section class="filters-card">
+    <div class="filters-grid">
+      <label class="filter-field">
+        <span class="filter-field__label">Véhicule</span>
+        <input
+          class="filter-field__input"
+          #searchInput
+          type="text"
+          [value]="searchDraft()"
+          (input)="searchDraft.set(searchInput.value)"
+          placeholder="Immatriculation, marque, modèle..." />
+      </label>
+    </div>
+
+    <div class="filters-actions">
+      <div class="filters-actions__buttons">
+        <button type="button" class="btn-secondary" (click)="resetSearch()" [disabled]="!search() && !searchDraft()">Réinitialiser</button>
+        <button type="button" class="btn-primary" (click)="applySearch()">Appliquer</button>
+      </div>
+    </div>
+  </section>
+
+  @if (loading()) {
+    <div class="list-page__center">
+      <div class="state-panel" role="status">Chargement des véhicules...</div>
+    </div>
+  } @else if (error()) {
+    <div class="list-page__center">
+      <div class="state-panel error-state" role="alert">
+        Impossible de charger les véhicules.
+        <button type="button" class="btn-secondary" (click)="loadVehicles()">Réessayer</button>
+      </div>
+    </div>
+  } @else if (!hasVehicles()) {
+    <div class="list-page__center">
+      <div class="state-panel">Aucun véhicule ne correspond à votre recherche.</div>
+    </div>
+  } @else {
+    <div class="list-page__table-wrapper">
+      <div class="table-row table-row--head">
+        <span class="table-cell">Véhicule</span>
+        <span class="table-cell">Immatriculation</span>
+        <span class="table-cell">Année</span>
+        <span class="table-cell">Kilométrage</span>
+        <span class="table-cell">Client</span>
+      </div>
+      @for (vehicle of vehicles(); track vehicle.id) {
+        <div class="table-row">
+          <span class="table-cell">
+            <span class="vehicule-label">{{ vehicle.marque }} {{ vehicle.modele }}</span>
+          </span>
+          <span class="table-cell">
+            <a [routerLink]="['/vehicules', vehicle.id]" class="link-numero">{{ vehicle.immatriculationFictive }}</a>
+          </span>
+          <span class="table-cell">{{ vehicle.annee }}</span>
+          <span class="table-cell">{{ vehicle.kilometrage | number }} km</span>
+          <span class="table-cell">{{ vehicle.clientFictif }}</span>
+        </div>
+      }
+    </div>
+
+    @if (totalPages() > 1) {
+      <nav class="pagination" aria-label="Pagination des véhicules">
+        <button type="button" class="pagination__btn" (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 0" aria-label="Page précédente">Précédent</button>
+        @for (page of pageNumbers(); track page) {
+          <button
+            type="button"
+            class="pagination__btn"
+            [class.pagination__btn--active]="page === currentPage()"
+            (click)="goToPage(page)"
+            [attr.aria-current]="page === currentPage() ? 'page' : null">
+            {{ page + 1 }}
+          </button>
+        }
+        <button type="button" class="pagination__btn" (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages() - 1" aria-label="Page suivante">Suivant</button>
+      </nav>
+    }
+  }
+</div>

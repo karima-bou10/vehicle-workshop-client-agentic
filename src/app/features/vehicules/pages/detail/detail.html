@@ -1,0 +1,87 @@
+<div class="detail-page">
+  @if (loading()) {
+    <div class="detail-page__center">
+      <div class="state-panel" role="status">Chargement du véhicule...</div>
+    </div>
+  } @else if (error() || !vehicle()) {
+    <div class="detail-page__center">
+      <div class="state-panel error-state" role="alert">Impossible de charger les détails de ce véhicule.</div>
+    </div>
+  } @else {
+    <header class="detail-page__header">
+      <div class="detail-page__breadcrumb">
+        <a routerLink="/vehicules" class="breadcrumb-link">← Véhicules</a>
+      </div>
+
+      <div class="detail-page__title-row">
+        <div>
+          <h1 class="detail-page__numero">{{ vehicle()!.marque }} {{ vehicle()!.modele }}</h1>
+          <p class="detail-page__subtitle">{{ vehicle()!.immatriculationFictive }}</p>
+        </div>
+        <div class="detail-page__status-zone">
+          <span class="status" [class.inactive]="!vehicle()!.actif">{{ vehicle()!.actif ? 'Actif' : 'Inactif' }}</span>
+        </div>
+      </div>
+
+      <div class="action-grid">
+        <a [routerLink]="['/vehicules', vehicle()!.id, 'modifier']" class="action-button action-button--secondary">Modifier</a>
+        <button type="button" *appHasRole="'ROLE_MANAGER'" class="action-button action-button--warning" (click)="deleteVehicle()" [disabled]="deleting()">
+          {{ deleting() ? 'Archivage...' : 'Archiver' }}
+        </button>
+      </div>
+    </header>
+
+    @if (deleteError()) { <p class="error-state" role="alert">L'archivage est refusé ou a échoué. Cette action est réservée au manager.</p> }
+
+    <div class="detail-page__grid">
+      <section class="detail-card detail-card--full">
+        <h2 class="detail-card__title">Informations</h2>
+        <dl class="detail-dl">
+          <div class="detail-dl__row"><dt>Marque</dt><dd>{{ vehicle()!.marque }}</dd></div>
+          <div class="detail-dl__row"><dt>Modèle</dt><dd>{{ vehicle()!.modele }}</dd></div>
+          <div class="detail-dl__row"><dt>Année</dt><dd>{{ vehicle()!.annee || 'Non renseignée' }}</dd></div>
+          <div class="detail-dl__row"><dt>Kilométrage</dt><dd>{{ vehicle()!.kilometrage ?? 'Non renseigné' }}{{ vehicle()!.kilometrage !== null ? ' km' : '' }}</dd></div>
+          <div class="detail-dl__row"><dt>Client fictif</dt><dd>{{ vehicle()!.clientFictif || 'Non renseigné' }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="detail-card detail-card--full">
+        <div class="detail-card__title-row">
+          <h2 class="detail-card__title">Interventions liées</h2>
+          <span class="pagination__info">{{ interventions().length }}</span>
+        </div>
+
+        @if (interventionsLoading()) {
+          <div class="section-center">
+            <div class="state-panel" role="status">Chargement des interventions...</div>
+          </div>
+        } @else if (interventionsError()) {
+          <div class="section-center">
+            <div class="state-panel error-state" role="alert">Impossible de charger les interventions liées.</div>
+          </div>
+        } @else if (interventions().length === 0) {
+          <div class="section-center">
+            <div class="state-panel">Aucune intervention liée à ce véhicule.</div>
+          </div>
+        } @else {
+          <div class="table-row table-row--interventions table-row--head">
+            <span class="table-cell">Numéro</span>
+            <span class="table-cell">Description</span>
+            <span class="table-cell">Dépôt</span>
+            <span class="table-cell">Statut</span>
+          </div>
+          @for (intervention of interventions(); track intervention.numero) {
+            <div class="table-row table-row--interventions">
+              <span class="table-cell">
+                <a [routerLink]="['/interventions', intervention.numero]" class="link-numero">{{ intervention.numero }}</a>
+              </span>
+              <span class="table-cell table-cell--wrap">{{ intervention.descriptionClient || 'Aucune description' }}</span>
+              <span class="table-cell">{{ intervention.dateDepot | date: 'dd/MM/yyyy HH:mm' }}</span>
+              <span class="table-cell"><app-status-tag [statut]="intervention.statut" /></span>
+            </div>
+          }
+        }
+      </section>
+    </div>
+  }
+</div>
