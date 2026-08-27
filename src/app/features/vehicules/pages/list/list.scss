@@ -182,7 +182,7 @@
 
 .table-row {
 	display: grid;
-	grid-template-columns: 1.2fr 1fr 0.7fr 0.9fr 1fr;
+	grid-template-columns: 1.2fr 1fr 0.7fr 0.9fr 1fr 1.6fr;
 	gap: 0.5rem;
 	align-items: center;
 	padding: 0.75rem 1rem;
@@ -218,6 +218,13 @@
 	white-space: nowrap;
 }
 
+.table-cell--actions {
+	display: flex;
+	gap: 0.4rem;
+	overflow: visible;
+	white-space: nowrap;
+}
+
 .link-numero {
 	font-family: 'Space Grotesk', monospace;
 	font-size: 0.82rem;
@@ -232,6 +239,52 @@
 
 .vehicule-label {
 	font-weight: 700;
+}
+
+.btn-action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0.28rem 0.6rem;
+	border: 1px solid transparent;
+	border-radius: 0.45rem;
+	font: inherit;
+	font-size: 0.78rem;
+	font-weight: 600;
+	text-decoration: none;
+	white-space: nowrap;
+	cursor: pointer;
+
+	&--view {
+		background: color-mix(in srgb, var(--color-action) 10%, transparent);
+		border-color: color-mix(in srgb, var(--color-action) 25%, transparent);
+		color: var(--color-action);
+	}
+
+	&--edit {
+		background: color-mix(in srgb, var(--color-done) 12%, transparent);
+		border-color: color-mix(in srgb, var(--color-done) 32%, transparent);
+		color: var(--color-done);
+
+		&:hover {
+			background: color-mix(in srgb, var(--color-done) 20%, transparent);
+		}
+	}
+
+	&--archive {
+		background: color-mix(in srgb, var(--color-wait) 14%, transparent);
+		border-color: color-mix(in srgb, var(--color-wait) 36%, transparent);
+		color: var(--color-wait);
+
+		&:hover:not(:disabled) {
+			background: color-mix(in srgb, var(--color-wait) 22%, transparent);
+		}
+	}
+
+	&:disabled {
+		cursor: not-allowed;
+		opacity: 0.55;
+	}
 }
 
 .retard-badge {

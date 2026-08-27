@@ -5,22 +5,28 @@ import { Page } from '../../../core/models/page.model';
 import { environment } from '../../../environments/environment.development';
 import { VehiculeIntervention, VehiculeListItem, VehiculeRequest } from '../models/vehicule.model';
 
+export interface VehiculeSearchCriteria {
+  immatriculation?: string;
+  marque?: string;
+  modele?: string;
+  annee?: number | null;
+  clientFictif?: string;
+  actif?: boolean | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class VehiculesService {
   private readonly http = inject(HttpClient);
   private readonly baseUrl = `${environment.apiUrl}/vehicules`;
 
-  list(pageOrSearch: number | string = 0, sizeOrPage: number = 10, sortOrSize: string | number = 'marque,asc', sort = 'marque,asc'): Observable<Page<VehiculeListItem>> {
-    const isSearchRequest = typeof pageOrSearch === 'string';
-    const search = isSearchRequest ? pageOrSearch : '';
-    const page = isSearchRequest ? sizeOrPage : pageOrSearch as number;
-    const size = isSearchRequest ? sortOrSize as number : sizeOrPage;
-    const ordering = isSearchRequest ? sort : sortOrSize as string;
-    let params = new HttpParams().set('page', page).set('size', size).set('sort', ordering);
-    if (search.trim()) {
-      params = params.set('search', search.trim());
+  list(criteria: VehiculeSearchCriteria = {}, page = 0, size = 10, sort = 'marque,asc'): Observable<Page<VehiculeListItem>> {
+    let params = new HttpParams().set('page', page).set('size', size).set('sort', sort);
+    for (const [key, value] of Object.entries(criteria)) {
+      if (value !== null && value !== undefined && value !== '') {
+        params = params.set(key, value);
+      }
     }
-    return this.http.get<Page<VehiculeListItem>>(`${this.baseUrl}/getVehicules`, { params });
+    return this.http.get<Page<VehiculeListItem>>(`${this.baseUrl}/search`, { params });
   }
 
   create(request: VehiculeRequest): Observable<VehiculeListItem> {

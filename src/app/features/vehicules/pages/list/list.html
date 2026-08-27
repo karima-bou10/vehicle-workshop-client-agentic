@@ -16,20 +16,43 @@
   <section class="filters-card">
     <div class="filters-grid">
       <label class="filter-field">
-        <span class="filter-field__label">Véhicule</span>
+        <span class="filter-field__label">Immatriculation</span>
         <input
           class="filter-field__input"
-          #searchInput
           type="text"
-          [value]="searchDraft()"
-          (input)="searchDraft.set(searchInput.value)"
-          placeholder="Immatriculation, marque, modèle..." />
+          [value]="filterDraft().immatriculation ?? ''"
+          (input)="updateFilter('immatriculation', $any($event.target).value)"
+          placeholder="AB-123" />
+      </label>
+      <label class="filter-field">
+        <span class="filter-field__label">Marque</span>
+        <input class="filter-field__input" type="text" [value]="filterDraft().marque ?? ''" (input)="updateFilter('marque', $any($event.target).value)" placeholder="Renault" />
+      </label>
+      <label class="filter-field">
+        <span class="filter-field__label">Modèle</span>
+        <input class="filter-field__input" type="text" [value]="filterDraft().modele ?? ''" (input)="updateFilter('modele', $any($event.target).value)" placeholder="Clio" />
+      </label>
+      <label class="filter-field">
+        <span class="filter-field__label">Année</span>
+        <input class="filter-field__input" type="number" [value]="filterDraft().annee ?? ''" (input)="updateFilter('annee', $any($event.target).value)" />
+      </label>
+      <label class="filter-field">
+        <span class="filter-field__label">Client fictif</span>
+        <input class="filter-field__input" type="text" [value]="filterDraft().clientFictif ?? ''" (input)="updateFilter('clientFictif', $any($event.target).value)" placeholder="Nom du client" />
+      </label>
+      <label class="filter-field">
+        <span class="filter-field__label">Statut</span>
+        <select class="filter-field__input" [value]="filterDraft().actif === null || filterDraft().actif === undefined ? '' : filterDraft().actif" (change)="onStatusChange($any($event.target).value)">
+          <option value="">Tous les véhicules</option>
+          <option value="true">Actifs</option>
+          <option value="false">Inactifs</option>
+        </select>
       </label>
     </div>
 
     <div class="filters-actions">
       <div class="filters-actions__buttons">
-        <button type="button" class="btn-secondary" (click)="resetSearch()" [disabled]="!search() && !searchDraft()">Réinitialiser</button>
+        <button type="button" class="btn-secondary" (click)="resetSearch()" [disabled]="!hasActiveFilters()">Réinitialiser</button>
         <button type="button" class="btn-primary" (click)="applySearch()">Appliquer</button>
       </div>
     </div>
@@ -58,6 +81,7 @@
         <span class="table-cell">Année</span>
         <span class="table-cell">Kilométrage</span>
         <span class="table-cell">Client</span>
+        <span class="table-cell">Actions</span>
       </div>
       @for (vehicle of vehicles(); track vehicle.id) {
         <div class="table-row">
@@ -70,6 +94,18 @@
           <span class="table-cell">{{ vehicle.annee }}</span>
           <span class="table-cell">{{ vehicle.kilometrage | number }} km</span>
           <span class="table-cell">{{ vehicle.clientFictif }}</span>
+          <span class="table-cell table-cell--actions">
+            <a [routerLink]="['/vehicules', vehicle.id]" class="btn-action btn-action--view">Détail</a>
+            <a [routerLink]="['/vehicules', vehicle.id, 'modifier']" class="btn-action btn-action--edit">Modifier</a>
+            <button
+              type="button"
+              class="btn-action btn-action--archive"
+              *appHasRole="'ROLE_MANAGER'"
+              [disabled]="archivingId() !== null || !vehicle.actif"
+              (click)="archiveVehicle(vehicle)">
+              {{ archivingId() === vehicle.id ? 'Archivage...' : 'Archiver' }}
+            </button>
+          </span>
         </div>
       }
     </div>

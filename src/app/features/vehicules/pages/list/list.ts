@@ -2,13 +2,14 @@ import { DecimalPipe } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { LanguageService } from '../../../../core/services/language-service';
-import { VehiculesService } from '../../services/vehicules.service';
+import { VehiculesService, VehiculeSearchCriteria } from '../../services/vehicules.service';
 import { VehiculeListItem } from '../../models/vehicule.model';
+import { HasRoleDirective } from '../../../../shared/directives/has-role.directive';
 
 @Component({
   selector: 'app-vehicules-list-page',
   standalone: true,
-  imports: [DecimalPipe, RouterLink],
+  imports: [DecimalPipe, RouterLink, HasRoleDirective],
   templateUrl: './list.html',
   styleUrls: ['./list.scss']
 })
@@ -17,12 +18,14 @@ export class VehiculesListPage {
   private readonly vehiculesService = inject(VehiculesService);
 
   readonly vehicles = signal<VehiculeListItem[]>([]);
-  readonly search = signal('');
-  readonly searchDraft = signal('');
+  readonly filters = signal<VehiculeSearchCriteria>({});
+  readonly filterDraft = signal<VehiculeSearchCriteria>({});
   readonly currentPage = signal(0);
   readonly totalPages = signal(0);
   readonly loading = signal(true);
   readonly error = signal(false);
+  readonly archivingId = signal<number | null>(null);
+  readonly archiveError = signal<string | null>(null);
   readonly hasVehicles = computed(() => this.vehicles().length > 0);
 
   constructor() {
@@ -32,7 +35,7 @@ export class VehiculesListPage {
   loadVehicles(): void {
     this.loading.set(true);
     this.error.set(false);
-    this.vehiculesService.list(this.search(), this.currentPage()).subscribe({
+    this.vehiculesService.list(this.filters(), this.currentPage()).subscribe({
       next: (page) => {
         this.vehicles.set(page.content);
         this.totalPages.set(page.totalPages);
@@ -47,16 +50,60 @@ export class VehiculesListPage {
   }
 
   applySearch(): void {
-    this.search.set(this.searchDraft());
+    this.filters.set(this.filterDraft());
     this.currentPage.set(0);
     this.loadVehicles();
   }
 
   resetSearch(): void {
-    this.searchDraft.set('');
-    this.search.set('');
+    this.filters.set({});
+    this.filterDraft.set({});
     this.currentPage.set(0);
     this.loadVehicles();
+  }
+
+  updateFilter(key: keyof VehiculeSearchCriteria, value: string): void {
+    const next = { ...this.filterDraft() };
+    if (key === 'annee') {
+      next.annee = value ? Number(value) : null;
+    } else if (key === 'actif') {
+      next.actif = value === '' ? null : value === 'true';
+    } else {
+      next[key] = value;
+    }
+    this.filterDraft.set(next);
+  }
+
+  onStatusChange(value: string): void {
+    this.updateFilter('actif', value);
+    this.applySearch();
+  }
+
+  hasActiveFilters(): boolean {
+    return Object.values(this.filterDraft()).some((value) => value !== null && value !== undefined && value !== '');
+  }
+
+  archiveVehicle(vehicle: VehiculeListItem): void {
+    if (this.archivingId() !== null || !vehicle.actif) {
+      return;
+    }
+
+    if (!window.confirm(`Archiver le véhicule ${vehicle.immatriculationFictive} ?`)) {
+      return;
+    }
+
+    this.archivingId.set(vehicle.id);
+    this.archiveError.set(null);
+    this.vehiculesService.delete(vehicle.id).subscribe({
+      next: () => {
+        this.archivingId.set(null);
+        this.loadVehicles();
+      },
+      error: () => {
+        this.archivingId.set(null);
+        this.archiveError.set("L'archivage est refusé ou a échoué.");
+      }
+    });
   }
 
   goToPage(page: number): void {
