@@ -43,6 +43,21 @@
         </a>
         }
 
+        @if (canUseAiAssistant() && iv.statut === 'RECUE') {
+        <button
+          type="button"
+          class="action-button action-button--ai"
+          (click)="launchAiAssistant()"
+          [disabled]="aiLoading()"
+        >
+          @if (aiLoading()) {
+          Chargement IA...
+          } @else {
+          Assistant diagnostic (IA)
+          }
+        </button>
+        }
+
         @if (iv.statut === 'DIAGNOSTIC_EN_COURS') {
         <a [routerLink]="['/interventions', 'devis']" [queryParams]="{ numero: iv.numero }"
             class="action-button action-button--primary">
@@ -191,6 +206,71 @@
         <section class="detail-card detail-card--full">
           <h2 class="detail-card__title">Diagnostic</h2>
           <p class="detail-text">{{ iv.diagnostic }}</p>
+        </section>
+      }
+
+      @if (aiPanelOpen() && aiProposal(); as proposition) {
+        <section class="detail-card detail-card--full detail-card--ai-suggestion">
+          <div class="detail-card__title-row">
+            <h2 class="detail-card__title">Assistant diagnostic IA</h2>
+            <span class="ai-suggestion-badge">SUGGESTION IA</span>
+          </div>
+          <p class="ai-suggestion-note">
+            Cette proposition est une aide. Elle n'est jamais appliquee automatiquement aux donnees metier.
+          </p>
+
+          <div class="ai-suggestion-block">
+            <h3>Reformulation professionnelle</h3>
+            <p class="detail-text">{{ proposition.reformulation }}</p>
+          </div>
+
+          <div class="ai-suggestion-grid">
+            <div class="ai-suggestion-block">
+              <h3>Hypotheses de diagnostic</h3>
+              <ol>
+                @for (item of proposition.hypotheses; track $index) {
+                  <li>{{ item }}</li>
+                }
+              </ol>
+            </div>
+
+            <div class="ai-suggestion-block">
+              <h3>Points de controle</h3>
+              <ol>
+                @for (item of proposition.pointsControle; track $index) {
+                  <li>{{ item }}</li>
+                }
+              </ol>
+            </div>
+          </div>
+
+          <div class="ai-suggestion-block">
+            <h3>Priorite suggeree</h3>
+            <p class="detail-text">{{ prioriteLibelle(proposition.prioriteSuggeree) }}</p>
+          </div>
+
+          <div class="ai-suggestion-block">
+            <h3>Modifier avant utilisation</h3>
+            <textarea
+              rows="10"
+              class="ai-suggestion-input"
+              [value]="aiDiagnosticDraft()"
+              [readonly]="!aiEditing()"
+              (input)="onAiDraftInput($any($event.target).value)"
+            ></textarea>
+          </div>
+
+          <div class="ai-suggestion-actions">
+            <button type="button" class="action-button action-button--secondary" (click)="enableAiEdit()">
+              MODIFIER
+            </button>
+            <button type="button" class="action-button action-button--success" (click)="acceptAiSuggestion()">
+              ACCEPTER
+            </button>
+            <button type="button" class="action-button action-button--secondary" (click)="ignoreAiSuggestion()">
+              IGNORER
+            </button>
+          </div>
         </section>
       }
     </div>

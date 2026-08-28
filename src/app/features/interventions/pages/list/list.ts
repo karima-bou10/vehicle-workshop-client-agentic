@@ -116,7 +116,7 @@ export class InterventionsListPage implements OnInit {
     this.loading.set(true);
     this.service.list(this.filters(), page, size, sort).subscribe({
       next: (data) => {
-        this.page.set(data);
+        this.page.set({ ...data, content: data.content.sort((a, b) => b.numero.localeCompare(a.numero)) });
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
