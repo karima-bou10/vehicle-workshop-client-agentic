@@ -28,7 +28,7 @@ export class VehiculesService {
     }
     return this.http.get<Page<VehiculeListItem>>(`${this.baseUrl}/search`, { params });
   }
-
+  
   create(request: VehiculeRequest): Observable<VehiculeListItem> {
     return this.http.post<VehiculeListItem>(this.baseUrl, request);
   }

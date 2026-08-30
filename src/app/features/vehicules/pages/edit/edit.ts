@@ -4,10 +4,18 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { VehiculesService } from '../../services/vehicules.service';
 
-const DUPLICATE_ERROR_MESSAGE = 'Un véhicule avec cette immatriculation existe déjà.';
 const GENERIC_ERROR_MESSAGE = 'La modification a échoué. Vérifiez les informations et réessayez.';
 const NAME_PATTERN = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
-const IMMATRICULATION_PATTERN = /^[A-Za-z]+-[0-9]+$/;
+const IMMATRICULATION_PATTERN = /^[A-Z]{2}-\d{3}-[A-Z]{2}$/;
+
+/** Extrait le message d'erreur métier renvoyé par le backend (BusinessException). */
+function backendMessage(err: HttpErrorResponse): string | null {
+  if (err.status < 400 || err.status >= 500) return null;
+  const body = err.error;
+  if (!body) return null;
+  if (typeof body === 'string') return body;
+  return body.message ?? body.detail ?? body.error ?? null;
+}
 
 @Component({
   selector: 'app-vehicule-edit-page',
@@ -30,12 +38,12 @@ export class VehiculeEditPage {
   readonly notFound = signal(false);
 
   readonly form = this.formBuilder.nonNullable.group({
-    immatriculationFictive: ['', [Validators.required, Validators.maxLength(20), Validators.pattern(IMMATRICULATION_PATTERN)]],
-    marque: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(NAME_PATTERN)]],
-    modele: ['', [Validators.required, Validators.maxLength(100), Validators.pattern(NAME_PATTERN)]],
-    annee: [null as number | null, [Validators.required, Validators.min(1900), Validators.max(this.maxYear)]],
+    immatriculationFictive: ['', [Validators.required, Validators.pattern(IMMATRICULATION_PATTERN)]],
+    marque: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(NAME_PATTERN)]],
+    modele: ['', [Validators.required, Validators.maxLength(50), Validators.pattern(NAME_PATTERN)]],
+    annee: [null as number | null, [Validators.required, Validators.min(1900), Validators.max(2100)]],
     kilometrage: [null as number | null, [Validators.required, Validators.min(0), Validators.max(9999999)]],
-    clientFictif: ['', [Validators.maxLength(100)]]
+    clientFictif: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]]
   });
 
   constructor() {
@@ -76,7 +84,7 @@ export class VehiculeEditPage {
     this.vehiculesService.update(this.vehicleId, this.form.getRawValue()).subscribe({
       next: () => this.router.navigate(['/vehicules', this.vehicleId]),
       error: (err: HttpErrorResponse) => {
-        this.error.set(err.status === 409 ? DUPLICATE_ERROR_MESSAGE : GENERIC_ERROR_MESSAGE);
+        this.error.set(backendMessage(err) ?? GENERIC_ERROR_MESSAGE);
         this.saving.set(false);
       }
     });

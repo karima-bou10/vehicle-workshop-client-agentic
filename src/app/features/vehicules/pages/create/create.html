@@ -8,8 +8,8 @@
     <div class="form-grid">
       <label>
         <span>Immatriculation fictive <b aria-hidden="true">*</b></span>
-        <input type="text" formControlName="immatriculationFictive" placeholder="Ex. AB-123" autocomplete="off" />
-        @if (hasError('immatriculationFictive')) { <small>L'immatriculation est obligatoire et doit respecter le format LETTRES-CHIFFRES (ex. AB-123).</small> }
+        <input type="text" formControlName="immatriculationFictive" placeholder="Ex. AB-123-CD" autocomplete="off" />
+        @if (hasError('immatriculationFictive')) { <small>L'immatriculation est obligatoire et doit respecter le format AA-123-AA (ex. AB-123-CD).</small> }
       </label>
 
       <label>
@@ -37,8 +37,9 @@
       </label>
 
       <label>
-        <span>Client fictif</span>
+        <span>Client fictif <b aria-hidden="true">*</b></span>
         <input type="text" formControlName="clientFictif" placeholder="Ex. Sophie Martin" />
+        @if (hasError('clientFictif')) { <small>Le client est obligatoire (entre 2 et 100 caractères).</small> }
       </label>
     </div>
 

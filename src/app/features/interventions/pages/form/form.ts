@@ -152,13 +152,14 @@ export class InterventionsFormPage implements OnInit {
   }
 
   private loadVehicules(): void {
-    this.vehiculesService.list(0, 200).subscribe({
+    this.vehiculesService.list({}, 0, 200).subscribe({
       next: (page) => {
         this.vehicules.set(page.content.filter((v) => v.actif));
       },
       error: () => this.vehicules.set([]),
     });
   }
+
 
   private loadIntervention(numero: string): void {
     this.loading.set(true);
