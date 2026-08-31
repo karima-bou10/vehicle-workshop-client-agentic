@@ -13,6 +13,12 @@
   flex-wrap: wrap;
 }
 
+.list-page__header-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
 .list-page__title {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 1.5rem;
@@ -171,6 +177,35 @@
 
   &:active {
     transform: translateY(0);
+  }
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.65rem;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.9rem;
+  border: 1px solid var(--border-soft);
+  background: color-mix(in srgb, var(--surface-card) 86%, var(--surface-bg));
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: border-color 180ms ease, transform 100ms ease, background-color 180ms ease;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-action);
+    background: color-mix(in srgb, var(--color-action) 10%, var(--surface-card));
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
   }
 }
 
