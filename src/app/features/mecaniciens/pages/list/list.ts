@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -41,6 +41,7 @@ export class MecaniciensListPage implements OnInit {
   private readonly languageService = inject(LanguageService);
 
   readonly loading = signal(false);
+  readonly exporting = signal(false);
   readonly loadError = signal(false);
   readonly page = signal<Page<Mecanicien> | null>(null);
   readonly currentPage = signal(0);
@@ -209,6 +210,23 @@ export class MecaniciensListPage implements OnInit {
     this.resetToFirstPageAndLoad();
   }
 
+  exportCsv(): void {
+    if (this.exporting()) {
+      return;
+    }
+
+    this.exporting.set(true);
+    this.service.exportCsv().subscribe({
+      next: (response) => {
+        this.downloadCsv(response);
+        this.exporting.set(false);
+      },
+      error: () => {
+        this.exporting.set(false);
+      },
+    });
+  }
+
   toggleDisponibilite(item: Mecanicien): void {
     this.togglingId.set(item.id);
     this.service.updateDisponibilite(item.id, { disponible: !item.disponible }).subscribe({
@@ -275,6 +293,29 @@ export class MecaniciensListPage implements OnInit {
 
   get pageRange(): number[] {
     return Array.from({ length: this.totalPages }, (_, i) => i);
+  }
+
+  private downloadCsv(response: HttpResponse<Blob>): void {
+    const blob = response.body;
+    if (!blob) {
+      this.notification.error('Export CSV vide ou indisponible.');
+      return;
+    }
+
+    const contentDisposition = response.headers.get('Content-Disposition') ?? '';
+    const fileName = this.extractFilename(contentDisposition) ?? 'mecaniciens.csv';
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = fileName;
+    anchor.click();
+    URL.revokeObjectURL(url);
+    this.notification.success('Export CSV généré.');
+  }
+
+  private extractFilename(contentDisposition: string): string | null {
+    const match = /filename="?([^";]+)"?/i.exec(contentDisposition);
+    return match?.[1] ?? null;
   }
 }
 

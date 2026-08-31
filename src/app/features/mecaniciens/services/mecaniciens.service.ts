@@ -1,4 +1,4 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Page } from '../../../core/models/page.model';
@@ -22,6 +22,13 @@ export class MecaniciensService {
       .set('size', size)
       .set('sort', sort);
     return this.http.get<Page<Mecanicien>>(this.baseUrl, { params });
+  }
+
+  exportCsv(): Observable<HttpResponse<Blob>> {
+    return this.http.get(`${this.baseUrl}/export`, {
+      observe: 'response' as const,
+      responseType: 'blob' as const,
+    });
   }
 
   listDisponibles(page = 0, size = 20, sort = 'nom,ASC'): Observable<Page<Mecanicien>> {

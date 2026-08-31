@@ -5,7 +5,12 @@
       <h1 class="list-page__title">{{ t('mecaniciens.title') }}</h1>
       <p class="list-page__subtitle">{{ t('mecaniciens.subtitle') }}</p>
     </div>
-    <a *appHasRole="'ROLE_MANAGER'" routerLink="/mecaniciens/nouveau" class="btn-primary">+ Nouveau mécanicien</a>
+    <div class="list-page__header-actions">
+      <button type="button" class="btn-secondary" [disabled]="exporting()" (click)="exportCsv()">
+        {{ exporting() ? 'Export en cours…' : 'Exporter CSV' }}
+      </button>
+      <a *appHasRole="'ROLE_MANAGER'" routerLink="/mecaniciens/nouveau" class="btn-primary">+ Nouveau mécanicien</a>
+    </div>
   </header>
 
   <div class="search-zone">
