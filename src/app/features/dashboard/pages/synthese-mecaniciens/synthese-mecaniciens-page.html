@@ -1,0 +1,54 @@
+<div class="list-page">
+
+  <header class="list-page__header">
+    <div>
+      <h1 class="list-page__title">{{ t('dashboard.synthese.title') }}</h1>
+      <p class="list-page__subtitle">{{ t('dashboard.synthese.subtitle') }}</p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <div class="list-page__center">
+      <app-loading-spinner />
+    </div>
+  } @else if (loadError()) {
+    <app-empty-state message="Impossible de charger la synthèse des mécaniciens. Réessayez plus tard." />
+  } @else if (!page() || page()!.content.length === 0) {
+    <app-empty-state message="Aucune synthèse disponible pour le moment." />
+  } @else {
+    <div class="list-page__table-wrapper">
+      <app-paginated-table [headers]="tableHeaders">
+        @for (item of page()!.content; track item.id) {
+          <div class="table-row">
+            <span class="table-cell"><a [routerLink]="['/mecaniciens', item.id]" class="link-nom">{{ item.nom }}</a></span>
+            <span class="table-cell">{{ specialiteLibelle(item.specialite) }}</span>
+            <span class="table-cell"><span class="badge" [class.badge--disponible]="item.disponible">{{ item.disponible ? 'Disponible' : 'Indisponible' }}</span></span>
+            <span class="table-cell">{{ item.nombreInterventionsEnCours }}</span>
+            <span class="table-cell">{{ item.nombreInterventionsEnReparation }}</span>
+            <span class="table-cell">{{ item.nombreInterventionsTerminees }}</span>
+            <span class="table-cell"><span [class.badge--warning]="item.nombreInterventionsEnRetard > 0">{{ item.nombreInterventionsEnRetard }}</span></span>
+            <span class="table-cell">{{ formatDelai(item.delaiMoyenTraitementHeures) }}</span>
+            <span class="table-cell table-cell--actions">
+              <a (click)="detail(item.id)" class="btn-action btn-action--view">Détail</a>
+            </span>
+          </div>
+        }
+      </app-paginated-table>
+    </div>
+
+    @if (totalPages > 1) {
+      <nav class="pagination" aria-label="Pagination">
+        <button type="button" class="pagination__btn" [disabled]="currentPage() === 0" (click)="goToPage(currentPage() - 1)">‹ Préc.</button>
+
+        @for (p of pageRange; track p) {
+          <button type="button" class="pagination__btn" [class.pagination__btn--active]="p === currentPage()" (click)="goToPage(p)">{{ p + 1 }}</button>
+        }
+
+        <button type="button" class="pagination__btn" [disabled]="currentPage() >= totalPages - 1" (click)="goToPage(currentPage() + 1)">Suiv. ›</button>
+
+        <span class="pagination__info">Page {{ currentPage() + 1 }} / {{ totalPages }} &nbsp;·&nbsp; {{ page()!.totalElements }} résultats</span>
+      </nav>
+    }
+  }
+
+</div>

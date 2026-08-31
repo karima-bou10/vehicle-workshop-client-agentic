@@ -1,0 +1,55 @@
+<section class="create-page" aria-labelledby="create-title">
+  <header class="page-heading">
+    <h1 id="create-title">Nouveau véhicule</h1>
+    <p>Enregistrez les informations du véhicule dans le parc de l'atelier.</p>
+  </header>
+
+  <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+    <div class="form-grid">
+      <label>
+        <span>Immatriculation fictive <b aria-hidden="true">*</b></span>
+        <input type="text" formControlName="immatriculationFictive" placeholder="Ex. AB-123-CD" autocomplete="off" />
+        @if (hasError('immatriculationFictive')) { <small>L'immatriculation est obligatoire et doit respecter le format AA-123-AA (ex. AB-123-CD).</small> }
+      </label>
+
+      <label>
+        <span>Marque <b aria-hidden="true">*</b></span>
+        <input type="text" formControlName="marque" placeholder="Ex. Renault" />
+        @if (hasError('marque')) { <small>La marque doit être une chaîne valide (lettres uniquement, sans chiffres ni caractères spéciaux).</small> }
+      </label>
+
+      <label>
+        <span>Modèle <b aria-hidden="true">*</b></span>
+        <input type="text" formControlName="modele" placeholder="Ex. Clio" />
+        @if (hasError('modele')) { <small>Le modèle doit être une chaîne valide (lettres uniquement, sans chiffres ni caractères spéciaux).</small> }
+      </label>
+
+      <label>
+        <span>Année <b aria-hidden="true">*</b></span>
+        <input type="number" formControlName="annee" min="1900" [max]="maxYear" placeholder="Ex. 2022" />
+        @if (hasError('annee')) { <small>L'année est obligatoire et doit être comprise entre 1900 et {{ maxYear }}.</small> }
+      </label>
+
+      <label>
+        <span>Kilométrage <b aria-hidden="true">*</b></span>
+        <input type="number" formControlName="kilometrage" min="0" step="1" placeholder="Ex. 45000" />
+        @if (hasError('kilometrage')) { <small>Le kilométrage est obligatoire et doit être positif.</small> }
+      </label>
+
+      <label>
+        <span>Client fictif <b aria-hidden="true">*</b></span>
+        <input type="text" formControlName="clientFictif" placeholder="Ex. Sophie Martin" />
+        @if (hasError('clientFictif')) { <small>Le client est obligatoire (entre 2 et 100 caractères).</small> }
+      </label>
+    </div>
+
+    @if (error(); as message) {
+      <p class="error-message" role="alert">{{ message }}</p>
+    }
+
+    <div class="actions">
+      <button type="button" class="secondary" (click)="cancel()">Annuler</button>
+      <button type="submit" class="primary" [disabled]="saving() || form.invalid">{{ saving() ? 'Création...' : 'Créer le véhicule' }}</button>
+    </div>
+  </form>
+</section>

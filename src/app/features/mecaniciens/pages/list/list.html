@@ -114,8 +114,8 @@
                   title="Basculer la disponibilité">
                   {{ item.disponible ? 'Marquer indisponible' : 'Marquer disponible' }}
                 </button>
-                <button type="button" class="btn-action btn-action--deactivate" title="Désactiver" (click)="confirmDeactivate(item)">
-                  Désactiver
+                <button type="button" class="btn-action btn-action--deactivate" title="Archiver" (click)="confirmDeactivate(item)">
+                  Archiver
                 </button>
               </ng-container>
             </span>
@@ -163,10 +163,10 @@
   @if (deactivateTarget()) {
     <app-confirmation-dialog
       [open]="!!deactivateTarget()"
-      title="Désactiver le mécanicien ?"
+      title="Archiver le mécanicien ?"
       [message]="deactivateDialogMessage(deactivateTarget()!)"
       variant="alert"
-      confirmLabel="Désactiver"
+      confirmLabel="Archiver"
       cancelLabel="Retour"
       (confirm)="doDeactivate()"
       (cancel)="cancelDeactivate()" />
@@ -175,7 +175,7 @@
   @if (blockedMecanicien()) {
     <app-confirmation-dialog
       [open]="!!blockedMecanicien()"
-      title="Désactivation impossible"
+      title="Archivage impossible"
       [message]="blockedMessage(blockedMecanicien()!)"
       variant="info"
       confirmLabel="Fermer"

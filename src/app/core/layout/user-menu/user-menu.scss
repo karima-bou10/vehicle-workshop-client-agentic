@@ -22,7 +22,22 @@
   display: grid;
   place-items: center;
   background: linear-gradient(135deg, var(--color-action), #2a78d4);
-  font-weight: 700;
+}
+
+.user-menu__avatar-icon {
+  width: 1.15rem;
+  height: 1.15rem;
+  display: block;
+  color: #fff;
+
+  path,
+  circle {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 }
 
 .user-menu__identite {
@@ -65,6 +80,24 @@
   border-radius: 0.55rem;
   padding: 0.55rem;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+}
+
+.user-menu__action-icon {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+
+  path {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
 }
 
 .user-menu__action--danger {
@@ -74,6 +107,10 @@
 
 .user-menu--reduit .user-menu__identite,
 .user-menu--reduit .user-menu__chevron {
+  display: none;
+}
+
+.user-menu--reduit .user-menu__logout-label {
   display: none;
 }
 

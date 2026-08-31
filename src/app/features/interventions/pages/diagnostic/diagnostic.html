@@ -15,7 +15,7 @@
 			</label>
 
 			@if (form.controls.diagnostic.touched && form.controls.diagnostic.invalid) {
-				<p class="workflow-form__error">Diagnostic obligatoire, au moins 3 caractères.</p>
+				<p class="workflow-form__error">Diagnostic obligatoire, au moins 25 caractères.</p>
 			}
 
 			<div class="workflow-form__actions">
@@ -28,7 +28,7 @@
 	<app-confirmation-dialog
 		[open]="dialogOpen()"
 		title="Confirmer le diagnostic ?"
-		[message]="'Le diagnostic sera enregistré puis l\'intervention passera au statut Diagnostic en cours.'"
+		[message]="'Le diagnostic sera enregistré puis l\'intervention passera au statut Diagnostiquée.'"
 		variant="info"
 		confirmLabel="Confirmer"
 		cancelLabel="Retour"

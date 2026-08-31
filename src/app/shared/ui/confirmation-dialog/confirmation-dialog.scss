@@ -14,9 +14,7 @@
   place-items: center;
   padding: 1.25rem;
   background: rgba(7, 11, 17, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  animation: backdropFade 140ms ease-out;
+  //animation: backdropFade 140ms ease-out;
 }
 
 .dialog-shell {

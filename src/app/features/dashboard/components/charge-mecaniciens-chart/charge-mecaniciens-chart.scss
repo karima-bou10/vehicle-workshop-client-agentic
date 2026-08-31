@@ -8,3 +8,46 @@
   position: relative;
   height: 280px;
 }
+
+.chart-wrapper {
+  position: relative;
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.chart-action {
+  margin-left: 1rem;
+  font-size: 0.9rem;
+  padding: 0.4rem 0.6rem;
+}
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  text-decoration: none;
+  padding: 0.6rem 1.1rem;
+  border-radius: 0.65rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  background: linear-gradient(135deg, var(--color-action), #2a78d4);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(31, 93, 170, 0.3);
+  transition: box-shadow 180ms ease, transform 100ms ease;
+  white-space: nowrap;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(31, 93, 170, 0.4);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+

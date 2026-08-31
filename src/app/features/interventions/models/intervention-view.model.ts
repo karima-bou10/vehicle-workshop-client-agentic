@@ -77,6 +77,9 @@ export interface InterventionUpdateRequest {
   descriptionClient: string;
   priorite: PrioriteIntervention;
   dateDepot: string;
+  diagnostic: string | null;
+  coutEstime: number | null;
+  dateRestitutionPrevue: string | null;
 }
 
 // Libellés FR pour affichage

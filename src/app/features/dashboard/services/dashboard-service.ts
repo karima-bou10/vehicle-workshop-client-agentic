@@ -7,6 +7,7 @@ import { Intervention } from '../../interventions/models/intervention-view.model
 import {
   DashboardKpis,
   MecanicienChargeItem,
+  MecanicienSynthese,
   StatutRepartitionItem,
   TypeRepartitionItem,
   VolumeJournalierItem,
@@ -31,6 +32,12 @@ export class DashboardService {
 
   chargeMecaniciens(): Observable<MecanicienChargeItem[]> {
     return this.http.get<MecanicienChargeItem[]>(`${this.baseUrl}/charge-mecaniciens`);
+  }
+
+  syntheseMecaniciens(page = 0, size = 10, sort?: string): Observable<Page<MecanicienSynthese>> {
+    let params = new HttpParams().set('page', page).set('size', size);
+    if (sort) params = params.set('sort', sort);
+    return this.http.get<Page<MecanicienSynthese>>(`${this.baseUrl}/mecaniciens/synthese`, { params });
   }
 
   repartitionStatuts(): Observable<StatutRepartitionItem[]> {
