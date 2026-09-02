@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Page } from '../../../core/models/page.model';
-import { environment } from '../../../environments/environment.development';
+import { environment } from '../../../environments/environment';
 import { AiDiagnosticProposition } from '../models/ai-diagnostic-proposition.model';
 import {
   HistoriqueInterventionResponse,
