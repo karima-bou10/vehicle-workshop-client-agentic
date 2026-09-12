@@ -76,9 +76,25 @@ export class VehiculeEditPage {
     });
   }
 
-  hasChanges(): boolean {
-  return JSON.stringify(this.form.getRawValue()) !== JSON.stringify(this.initialValue);
-  }
+hasChanges(): boolean {
+  const current = {
+    ...this.form.getRawValue(),
+    immatriculationFictive: this.form.getRawValue().immatriculationFictive.trim(),
+    marque: this.form.getRawValue().marque.trim(),
+    modele: this.form.getRawValue().modele.trim(),
+    clientFictif: this.form.getRawValue().clientFictif.trim()
+  };
+
+  const initial = {
+    ...this.initialValue,
+    immatriculationFictive: this.initialValue.immatriculationFictive?.trim(),
+    marque: this.initialValue.marque?.trim(),
+    modele: this.initialValue.modele?.trim(),
+    clientFictif: this.initialValue.clientFictif?.trim()
+  };
+
+  return JSON.stringify(current) !== JSON.stringify(initial);
+}
   
 submit(): void {
   this.submitted.set(true);
