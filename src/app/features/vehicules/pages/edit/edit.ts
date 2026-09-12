@@ -6,7 +6,7 @@ import { VehiculesService } from '../../services/vehicules.service';
 
 const GENERIC_ERROR_MESSAGE = 'La modification a échoué. Vérifiez les informations et réessayez.';
 const NAME_PATTERN = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
-const IMMATRICULATION_PATTERN = /^[A-Z]{2}-\d{3}-[A-Z]{2}$/;
+
 
 /** Extrait le message d'erreur métier renvoyé par le backend (BusinessException). */
 function backendMessage(err: HttpErrorResponse): string | null {
@@ -37,8 +37,10 @@ export class VehiculeEditPage {
   readonly error = signal<string | null>(null);
   readonly notFound = signal(false);
 
+  private initialValue: any;
+
   readonly form = this.formBuilder.nonNullable.group({
-    immatriculationFictive: ['', [Validators.required, Validators.pattern(IMMATRICULATION_PATTERN)]],
+    immatriculationFictive: ['', [Validators.required]],
     marque: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(NAME_PATTERN)]],
     modele: ['', [Validators.required, Validators.maxLength(50), Validators.pattern(NAME_PATTERN)]],
     annee: [null as number | null, [Validators.required, Validators.min(1900), Validators.max(2100)]],
@@ -63,6 +65,8 @@ export class VehiculeEditPage {
           kilometrage: vehicle.kilometrage,
           clientFictif: vehicle.clientFictif
         });
+        this.initialValue = this.form.getRawValue();
+        this.form.markAsPristine();
         this.loading.set(false);
       },
       error: () => {
@@ -72,24 +76,49 @@ export class VehiculeEditPage {
     });
   }
 
-  submit(): void {
-    this.submitted.set(true);
-    this.error.set(null);
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+hasChanges(): boolean {
+  const current = {
+    ...this.form.getRawValue(),
+    immatriculationFictive: this.form.getRawValue().immatriculationFictive.trim(),
+    marque: this.form.getRawValue().marque.trim(),
+    modele: this.form.getRawValue().modele.trim(),
+    clientFictif: this.form.getRawValue().clientFictif.trim()
+  };
 
-    this.saving.set(true);
-    this.vehiculesService.update(this.vehicleId, this.form.getRawValue()).subscribe({
-      next: () => this.router.navigate(['/vehicules', this.vehicleId]),
-      error: (err: HttpErrorResponse) => {
-        this.error.set(backendMessage(err) ?? GENERIC_ERROR_MESSAGE);
-        this.saving.set(false);
-      }
-    });
+  const initial = {
+    ...this.initialValue,
+    immatriculationFictive: this.initialValue.immatriculationFictive?.trim(),
+    marque: this.initialValue.marque?.trim(),
+    modele: this.initialValue.modele?.trim(),
+    clientFictif: this.initialValue.clientFictif?.trim()
+  };
+
+  return JSON.stringify(current) !== JSON.stringify(initial);
+}
+  
+submit(): void {
+  this.submitted.set(true);
+  this.error.set(null);
+
+  if (this.form.invalid) {
+    this.form.markAllAsTouched();
+    return;
   }
 
+  if (!this.hasChanges()) {
+    return;
+  }
+
+  this.saving.set(true);
+
+  this.vehiculesService.update(this.vehicleId, this.form.getRawValue()).subscribe({
+    next: () => this.router.navigate(['/vehicules', this.vehicleId]),
+    error: (err: HttpErrorResponse) => {
+      this.error.set(backendMessage(err) ?? GENERIC_ERROR_MESSAGE);
+      this.saving.set(false);
+    }
+  });
+}
   hasError(field: keyof typeof this.form.controls): boolean {
     const control = this.form.controls[field];
     return control.invalid && (control.dirty || control.touched || this.submitted());
