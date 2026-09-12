@@ -26,7 +26,7 @@
 
       <div class="actions">
         <a class="secondary" [routerLink]="['/vehicules', vehicleId]">Annuler</a>
-        <button type="submit" class="primary" [disabled]="saving() || form.invalid">{{ saving() ? 'Enregistrement...' : 'Enregistrer les modifications' }}</button>
+        <button type="submit" class="primary" [disabled]="saving() || form.invalid || !hasChanges()">{{ saving() ? 'Enregistrement...' : 'Enregistrer les modifications' }}</button>
       </div>
     </form>
   }

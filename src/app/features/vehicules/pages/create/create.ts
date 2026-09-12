@@ -6,7 +6,6 @@ import { VehiculesService } from '../../services/vehicules.service';
 
 const GENERIC_ERROR_MESSAGE = 'La création du véhicule a échoué. Vérifiez les informations et réessayez.';
 const NAME_PATTERN = /^[A-Za-zÀ-ÖØ-öø-ÿ]+(?:[ '-][A-Za-zÀ-ÖØ-öø-ÿ]+)*$/;
-const IMMATRICULATION_PATTERN = /^[A-Z]{2}-\d{3}-[A-Z]{2}$/;
 
 /** Extrait le message d'erreur métier renvoyé par le backend (BusinessException). */
 function backendMessage(err: HttpErrorResponse): string | null {
@@ -34,7 +33,7 @@ export class VehiculeCreatePage {
   readonly maxYear = new Date().getFullYear() + 1;
 
   readonly form = this.formBuilder.nonNullable.group({
-    immatriculationFictive: ['', [Validators.required, Validators.pattern(IMMATRICULATION_PATTERN)]],
+    immatriculationFictive: ['', [Validators.required]],
     marque: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50), Validators.pattern(NAME_PATTERN)]],
     modele: ['', [Validators.required, Validators.maxLength(50), Validators.pattern(NAME_PATTERN)]],
     annee: [null as number | null, [Validators.required, Validators.min(1900), Validators.max(2100)]],
