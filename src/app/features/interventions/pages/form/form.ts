@@ -118,7 +118,7 @@ export class InterventionsFormPage implements OnInit {
       return true;
     }
     const status = this.currentStatus();
-    return status === 'DIAGNOSTIC_EN_COURS' || status === 'DEVIS_A_VALIDER';
+    return status === 'DIAGNOSTIC_EN_COURS' || status === 'DEVIS_A_VALIDER' || status === 'RECUE';
   });
   readonly canEditPriorite = computed(() => {
     if (!this.isEdit) {
@@ -140,6 +140,7 @@ export class InterventionsFormPage implements OnInit {
     if (numero) {
       this.editNumero.set(numero);
       this.loadIntervention(numero);
+      this.loadVehicules();
       return;
     }
 
@@ -155,6 +156,7 @@ export class InterventionsFormPage implements OnInit {
     this.vehiculesService.list({}, 0, 200).subscribe({
       next: (page) => {
         this.vehicules.set(page.content.filter((v) => v.actif));
+        this.syncVehiculeId();
       },
       error: () => this.vehicules.set([]),
     });
@@ -176,6 +178,7 @@ export class InterventionsFormPage implements OnInit {
           coutEstime: iv.coutEstime,
           dateRestitutionPrevue: iv.dateRestitutionPrevue ? this.toDateInput(iv.dateRestitutionPrevue) : '',
         });
+        this.syncVehiculeId();
         this.form.controls.vehiculeId.setValue(null);
         this.applyFieldRules();
 
@@ -191,6 +194,19 @@ export class InterventionsFormPage implements OnInit {
         this.router.navigateByUrl('/interventions');
       },
     });
+  }
+
+  private syncVehiculeId(): void{
+    const iv = this.sourceIntervention();
+    if (!iv) return;
+    const matchVehicule = this.vehicules().find(
+      v => v.immatriculationFictive === iv.vehicule.immatriculationFictive);
+    if (matchVehicule) {
+      this.form.controls.vehiculeId.setValue(matchVehicule.id);
+    }
+        console.log("v.immatriculationFictive::", this.vehicules())
+        console.log("iv.vehicule.immatriculationFictive::", iv.vehicule.immatriculationFictive)
+        console.log("match::", matchVehicule)
   }
 
   isInvalid(field: string): boolean {
@@ -215,6 +231,7 @@ export class InterventionsFormPage implements OnInit {
       }
 
       const req = {
+        vehiculeId: raw.vehiculeId!,
         type: raw.type as TypeIntervention,
         descriptionClient: raw.descriptionClient!,
         priorite: raw.priorite as PrioriteIntervention,
@@ -253,7 +270,6 @@ export class InterventionsFormPage implements OnInit {
   }
 
   private applyFieldRules(): void {
-    this.form.controls.vehiculeId.disable();
 
     if (!this.canEditForm()) {
       this.form.disable();
@@ -261,8 +277,8 @@ export class InterventionsFormPage implements OnInit {
     }
 
     this.form.enable();
-    this.form.controls.vehiculeId.disable();
 
+    this.toggleControl(this.form.controls.vehiculeId, this.canEditVehicule());
     this.toggleControl(this.form.controls.type, this.canEditType());
     this.toggleControl(this.form.controls.dateDepot, this.canEditDateDepot());
     this.toggleControl(this.form.controls.descriptionClient, this.canEditDescription());

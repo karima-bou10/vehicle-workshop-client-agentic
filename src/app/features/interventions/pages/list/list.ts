@@ -50,7 +50,7 @@ export class InterventionsListPage implements OnInit {
   readonly exporting = signal(false);
   readonly page = signal<Page<Intervention> | null>(null);
   readonly currentPage = signal(0);
-  readonly pageSize = signal(20);
+  readonly pageSize = signal(10);
   readonly currentSort = signal('dateDepot,DESC');
   readonly vueActive = signal<VueInterventions>('liste');
   readonly mecaniciens = signal<MecanicienListItem[]>([]);
@@ -96,7 +96,7 @@ export class InterventionsListPage implements OnInit {
     this.loadMecaniciens();
     this.route.queryParams.subscribe((params) => {
       const p = Number(params['page'] ?? 0);
-      const s = Number(params['size'] ?? 20);
+      const s = Number(params['size'] ?? 10);
       const sort = String(params['sort'] ?? 'dateDepot,DESC');
       this.currentPage.set(p);
       this.pageSize.set(s);
@@ -112,7 +112,7 @@ export class InterventionsListPage implements OnInit {
     });
   }
 
-  load(page = 0, size = 20, sort = this.currentSort()): void {
+  load(page = 0, size = 10, sort = this.currentSort()): void {
     this.loading.set(true);
     this.service.list(this.filters(), page, size, sort).subscribe({
       next: (data) => {

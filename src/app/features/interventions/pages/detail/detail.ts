@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ConfirmationDialog } from '../../../../shared/ui/confirmation-dialog/confirmation-dialog';
@@ -23,6 +23,7 @@ import {
 import { AiDiagnosticProposition } from '../../models/ai-diagnostic-proposition.model';
 import { InterventionsService } from '../../services/interventions.service';
 import { SPECIALITE_LIBELLES } from '../../../mecaniciens/models/mecanicien.model';
+import { timeout } from 'rxjs';
 
 type DialogState = {
   kind: 'transition' | 'archive';
@@ -59,6 +60,7 @@ export class InterventionsDetailPage implements OnInit {
   private readonly router = inject(Router);
   private readonly service = inject(InterventionsService);
   private readonly notification = inject(NotificationService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   readonly loading = signal(true);
   readonly intervention = signal<Intervention | null>(null);
@@ -336,10 +338,12 @@ export class InterventionsDetailPage implements OnInit {
         if (this.isFallbackProposal(proposal)) {
           this.notification.warning('Assistant indisponible, réessayez plus tard.');
         }
+        this.cdr.detectChanges;
       },
       error: () => {
         this.aiLoading.set(false);
         this.notification.error('Impossible de recuperer la proposition IA pour le moment.');
+        this.cdr.detectChanges;
       },
     });
   }

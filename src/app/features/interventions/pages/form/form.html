@@ -38,15 +38,23 @@
           }
         </div>
       }
+    
+                    @if (canEditVehicule()) {
+                    <div class="field" [class.field--erreur]="isInvalid('vehiculeId')">
+                      <label class="field__label" for="vehiculeId">Véhicule <span class="required">*</span></label>
+                      <select id="vehiculeId" formControlName="vehiculeId" class="field__input">
+                        <option [ngValue]="null" disabled selected hidden>Sélectionner un véhicule</option>
+                        @for(v of vehicules(); track v.id){
+                        <option [ngValue]="v.id">{{ v.marque }} {{ v.modele }} — {{ v.immatriculationFictive }}</option>
+                    
+                        }
+                      </select>
+                      @if (isInvalid('type')) {
+                      <span class="field__error" role="alert">Le véhicule est obligatoire.</span>
+                      }
+                    </div>
+                    }
 
-      @if (isEdit && sourceIntervention(); as iv) {
-        <div class="field field--full">
-          <label class="field__label">Véhicule</label>
-          <div class="field__input field__input--readonly">
-            {{ iv.vehicule.marque }} {{ iv.vehicule.modele }} — {{ iv.vehicule.immatriculationFictive }}
-          </div>
-        </div>
-      }
 
       <!-- Type -->
       @if (canEditType()) {
