@@ -179,7 +179,6 @@ export class InterventionsFormPage implements OnInit {
           dateRestitutionPrevue: iv.dateRestitutionPrevue ? this.toDateInput(iv.dateRestitutionPrevue) : '',
         });
         this.syncVehiculeId();
-        this.form.controls.vehiculeId.setValue(null);
         this.applyFieldRules();
 
         if (this.draftDiagnostic() && this.canEditDiagnostic()) {
